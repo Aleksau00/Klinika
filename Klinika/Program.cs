@@ -49,6 +49,7 @@ builder.Services.AddScoped<ICityRepository, CityRepository>();
 builder.Services.AddScoped<IWorkerRepository, WorkerRepository>();
 builder.Services.AddScoped<IClinicRepository, ClinicRepository>();
 builder.Services.AddScoped<IAppointmentSlotRepository, AppointmentSlotRepository>();
+builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>(); // NEW
 
 // Register services
 builder.Services.AddScoped<ICityService, CityService>();
@@ -56,6 +57,7 @@ builder.Services.AddScoped<IWorkerService, WorkerService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAppointmentSlotService, AppointmentSlotService>();
 builder.Services.AddScoped<IClinicService, ClinicService>();
+builder.Services.AddScoped<IAppointmentService, AppointmentService>(); // NEW
 
 // JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

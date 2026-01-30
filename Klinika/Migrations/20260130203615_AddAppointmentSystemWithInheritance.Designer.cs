@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Klinika.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260128231842_SeededClinicsWorkersCities")]
-    partial class SeededClinicsWorkersCities
+    [Migration("20260130203615_AddAppointmentSystemWithInheritance")]
+    partial class AddAppointmentSystemWithInheritance
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -280,6 +280,84 @@ namespace Klinika.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Klinika.Models.Appointment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AppointmentSlotId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AppointmentType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("BookedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("BookedByWorkerId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CancellationReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("CancelledAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("CheckedInAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ClinicId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DoctorId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PatientId")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly>("ScheduledDate")
+                        .HasColumnType("date");
+
+                    b.Property<TimeOnly>("ScheduledEndTime")
+                        .HasColumnType("time");
+
+                    b.Property<TimeOnly>("ScheduledStartTime")
+                        .HasColumnType("time");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppointmentSlotId")
+                        .IsUnique();
+
+                    b.HasIndex("BookedByWorkerId");
+
+                    b.HasIndex("ClinicId");
+
+                    b.HasIndex("DoctorId");
+
+                    b.HasIndex("PatientId");
+
+                    b.HasIndex("ScheduledDate");
+
+                    b.HasIndex("DoctorId", "ScheduledDate");
+
+                    b.ToTable("Appointments", (string)null);
+
+                    b.HasDiscriminator<int>("AppointmentType");
+
+                    b.UseTphMappingStrategy();
+                });
+
             modelBuilder.Entity("Klinika.Models.AppointmentSlot", b =>
                 {
                     b.Property<int>("Id")
@@ -309,6 +387,197 @@ namespace Klinika.Migrations
                         .IsUnique();
 
                     b.ToTable("AppointmentSlots");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Date = new DateOnly(2026, 2, 10),
+                            DoctorId = 4,
+                            EndTime = new TimeOnly(9, 15, 0),
+                            IsAvailable = false,
+                            StartTime = new TimeOnly(9, 0, 0)
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Date = new DateOnly(2026, 2, 10),
+                            DoctorId = 4,
+                            EndTime = new TimeOnly(9, 30, 0),
+                            IsAvailable = true,
+                            StartTime = new TimeOnly(9, 15, 0)
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Date = new DateOnly(2026, 2, 10),
+                            DoctorId = 4,
+                            EndTime = new TimeOnly(9, 45, 0),
+                            IsAvailable = true,
+                            StartTime = new TimeOnly(9, 30, 0)
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Date = new DateOnly(2026, 2, 10),
+                            DoctorId = 4,
+                            EndTime = new TimeOnly(10, 15, 0),
+                            IsAvailable = true,
+                            StartTime = new TimeOnly(10, 0, 0)
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Date = new DateOnly(2026, 2, 11),
+                            DoctorId = 4,
+                            EndTime = new TimeOnly(9, 15, 0),
+                            IsAvailable = true,
+                            StartTime = new TimeOnly(9, 0, 0)
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Date = new DateOnly(2026, 2, 11),
+                            DoctorId = 4,
+                            EndTime = new TimeOnly(9, 30, 0),
+                            IsAvailable = true,
+                            StartTime = new TimeOnly(9, 15, 0)
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Date = new DateOnly(2026, 2, 11),
+                            DoctorId = 4,
+                            EndTime = new TimeOnly(10, 15, 0),
+                            IsAvailable = true,
+                            StartTime = new TimeOnly(10, 0, 0)
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Date = new DateOnly(2026, 2, 12),
+                            DoctorId = 4,
+                            EndTime = new TimeOnly(9, 15, 0),
+                            IsAvailable = true,
+                            StartTime = new TimeOnly(9, 0, 0)
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Date = new DateOnly(2026, 2, 12),
+                            DoctorId = 4,
+                            EndTime = new TimeOnly(11, 15, 0),
+                            IsAvailable = true,
+                            StartTime = new TimeOnly(11, 0, 0)
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Date = new DateOnly(2026, 2, 10),
+                            DoctorId = 5,
+                            EndTime = new TimeOnly(10, 15, 0),
+                            IsAvailable = false,
+                            StartTime = new TimeOnly(10, 0, 0)
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Date = new DateOnly(2026, 2, 10),
+                            DoctorId = 5,
+                            EndTime = new TimeOnly(10, 30, 0),
+                            IsAvailable = true,
+                            StartTime = new TimeOnly(10, 15, 0)
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Date = new DateOnly(2026, 2, 10),
+                            DoctorId = 5,
+                            EndTime = new TimeOnly(10, 45, 0),
+                            IsAvailable = true,
+                            StartTime = new TimeOnly(10, 30, 0)
+                        },
+                        new
+                        {
+                            Id = 13,
+                            Date = new DateOnly(2026, 2, 11),
+                            DoctorId = 5,
+                            EndTime = new TimeOnly(14, 15, 0),
+                            IsAvailable = true,
+                            StartTime = new TimeOnly(14, 0, 0)
+                        },
+                        new
+                        {
+                            Id = 14,
+                            Date = new DateOnly(2026, 2, 11),
+                            DoctorId = 5,
+                            EndTime = new TimeOnly(14, 30, 0),
+                            IsAvailable = true,
+                            StartTime = new TimeOnly(14, 15, 0)
+                        },
+                        new
+                        {
+                            Id = 15,
+                            Date = new DateOnly(2026, 2, 10),
+                            DoctorId = 9,
+                            EndTime = new TimeOnly(13, 15, 0),
+                            IsAvailable = false,
+                            StartTime = new TimeOnly(13, 0, 0)
+                        },
+                        new
+                        {
+                            Id = 16,
+                            Date = new DateOnly(2026, 2, 10),
+                            DoctorId = 9,
+                            EndTime = new TimeOnly(13, 30, 0),
+                            IsAvailable = true,
+                            StartTime = new TimeOnly(13, 15, 0)
+                        },
+                        new
+                        {
+                            Id = 17,
+                            Date = new DateOnly(2026, 2, 11),
+                            DoctorId = 9,
+                            EndTime = new TimeOnly(15, 15, 0),
+                            IsAvailable = true,
+                            StartTime = new TimeOnly(15, 0, 0)
+                        },
+                        new
+                        {
+                            Id = 18,
+                            Date = new DateOnly(2026, 2, 11),
+                            DoctorId = 9,
+                            EndTime = new TimeOnly(15, 30, 0),
+                            IsAvailable = true,
+                            StartTime = new TimeOnly(15, 15, 0)
+                        },
+                        new
+                        {
+                            Id = 19,
+                            Date = new DateOnly(2026, 2, 10),
+                            DoctorId = 13,
+                            EndTime = new TimeOnly(11, 15, 0),
+                            IsAvailable = true,
+                            StartTime = new TimeOnly(11, 0, 0)
+                        },
+                        new
+                        {
+                            Id = 20,
+                            Date = new DateOnly(2026, 2, 10),
+                            DoctorId = 13,
+                            EndTime = new TimeOnly(11, 30, 0),
+                            IsAvailable = true,
+                            StartTime = new TimeOnly(11, 15, 0)
+                        },
+                        new
+                        {
+                            Id = 21,
+                            Date = new DateOnly(2026, 2, 11),
+                            DoctorId = 13,
+                            EndTime = new TimeOnly(9, 15, 0),
+                            IsAvailable = true,
+                            StartTime = new TimeOnly(9, 0, 0)
+                        });
                 });
 
             modelBuilder.Entity("Klinika.Models.City", b =>
@@ -1195,6 +1464,143 @@ namespace Klinika.Migrations
                     b.UseTptMappingStrategy();
                 });
 
+            modelBuilder.Entity("Klinika.Models.PreventiveAppointment", b =>
+                {
+                    b.HasBaseType("Klinika.Models.Appointment");
+
+                    b.Property<string>("PreventiveNotes")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.HasDiscriminator().HasValue(0);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 2,
+                            AppointmentSlotId = 10,
+                            AppointmentType = 0,
+                            BookedAt = new DateTime(2026, 2, 3, 14, 20, 0, 0, DateTimeKind.Unspecified),
+                            BookedByWorkerId = 20,
+                            ClinicId = 1,
+                            DoctorId = 5,
+                            PatientId = 28,
+                            ScheduledDate = new DateOnly(2026, 2, 10),
+                            ScheduledEndTime = new TimeOnly(10, 15, 0),
+                            ScheduledStartTime = new TimeOnly(10, 0, 0),
+                            Status = 0,
+                            PreventiveNotes = "Prehlada"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            AppointmentSlotId = 19,
+                            AppointmentType = 0,
+                            BookedAt = new DateTime(2026, 2, 1, 15, 45, 0, 0, DateTimeKind.Unspecified),
+                            BookedByWorkerId = 24,
+                            ClinicId = 3,
+                            DoctorId = 13,
+                            PatientId = 31,
+                            ScheduledDate = new DateOnly(2026, 2, 10),
+                            ScheduledEndTime = new TimeOnly(11, 15, 0),
+                            ScheduledStartTime = new TimeOnly(11, 0, 0),
+                            Status = 4,
+                            PreventiveNotes = "Ostati u krevetu ako se pojave simptomi prehlade ili gripa."
+                        });
+                });
+
+            modelBuilder.Entity("Klinika.Models.TreatmentAppointment", b =>
+                {
+                    b.HasBaseType("Klinika.Models.Appointment");
+
+                    b.Property<string>("Anamnesis")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("DiagnosedCondition")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("StatusObservation")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("Therapy")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.HasDiscriminator().HasValue(1);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            AppointmentSlotId = 1,
+                            AppointmentType = 1,
+                            BookedAt = new DateTime(2026, 2, 1, 10, 30, 0, 0, DateTimeKind.Unspecified),
+                            BookedByWorkerId = 20,
+                            CheckedInAt = new DateTime(2026, 2, 10, 8, 55, 0, 0, DateTimeKind.Unspecified),
+                            ClinicId = 1,
+                            CompletedAt = new DateTime(2026, 2, 10, 9, 12, 0, 0, DateTimeKind.Unspecified),
+                            DoctorId = 4,
+                            PatientId = 27,
+                            ScheduledDate = new DateOnly(2026, 2, 10),
+                            ScheduledEndTime = new TimeOnly(9, 15, 0),
+                            ScheduledStartTime = new TimeOnly(9, 0, 0),
+                            Status = 2,
+                            Anamnesis = "Pacijent se žali na bol u grudima koji traje 2 dana, kratkoća daha tokom fizičke aktivnosti, povremeno vrtoglavica. Nema porodičnu istoriju srčanih oboljenja. Puši 10 cigareta dnevno poslednjih 5 godina.",
+                            DiagnosedCondition = "Blaga hipertenzija sa sumnjom na anginu pektoris",
+                            StatusObservation = "Krvni pritisak: 145/95 mmHg (povišen), Puls: 88 otkucaja/min (blago ubrzan), Pacijent izgleda blago zabrinuto, osluškivanje srca pokazuje pravilne tonove bez šumova. EKG: blage promene u ST segmentu.",
+                            Therapy = "Propisano: Aspirin 100mg jednom dnevno, ACE inhibitor (Enalapril 5mg). Preporučeno: EKG test pod opterećenjem, smanjiti unos soli, umerena fizička aktivnost (šetnja 30min dnevno), prestanak pušenja. Kontrolni pregled za 2 nedelje."
+                        },
+                        new
+                        {
+                            Id = 3,
+                            AppointmentSlotId = 15,
+                            AppointmentType = 1,
+                            BookedAt = new DateTime(2026, 2, 2, 11, 0, 0, 0, DateTimeKind.Unspecified),
+                            BookedByWorkerId = 22,
+                            CheckedInAt = new DateTime(2026, 2, 10, 12, 58, 0, 0, DateTimeKind.Unspecified),
+                            ClinicId = 2,
+                            DoctorId = 9,
+                            PatientId = 29,
+                            ScheduledDate = new DateOnly(2026, 2, 10),
+                            ScheduledEndTime = new TimeOnly(13, 15, 0),
+                            ScheduledStartTime = new TimeOnly(13, 0, 0),
+                            Status = 1,
+                            Anamnesis = "Pacijent ima jake glavobolje koje traju već nedelju dana, lokalizovane na levoj strani glave. Bol se pogoršava ujutru, praćen je mučninom. Svetlost i buka pogoršavaju simptome. Nema poremećaja vida.",
+                            DiagnosedCondition = "Migrena",
+                            StatusObservation = "Neurološki pregled: uredan. Pupile jednake, reaguju na svetlo. Nema rigidnosti vrata. Krvni pritisak: 125/80 mmHg (normalan). Pacijent osećljiv na dodir leve temporalne regije.",
+                            Therapy = "Bromazepam, Brufen"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            AppointmentSlotId = 5,
+                            AppointmentType = 1,
+                            BookedAt = new DateTime(2026, 1, 28, 9, 15, 0, 0, DateTimeKind.Unspecified),
+                            BookedByWorkerId = 20,
+                            CancellationReason = "Pacijent zatražio otkazivanje - zakazao posao u inostranstvu, neće biti u gradu",
+                            CancelledAt = new DateTime(2026, 2, 8, 16, 30, 0, 0, DateTimeKind.Unspecified),
+                            ClinicId = 1,
+                            DoctorId = 4,
+                            PatientId = 30,
+                            ScheduledDate = new DateOnly(2026, 2, 11),
+                            ScheduledEndTime = new TimeOnly(9, 15, 0),
+                            ScheduledStartTime = new TimeOnly(9, 0, 0),
+                            Status = 3,
+                            Anamnesis = "Pacijent ima jake glavobolje koje traju već nedelju dana, lokalizovane na levoj strani glave. Bol se pogoršava ujutru, praćen je mučninom. Svetlost i buka pogoršavaju simptome. Nema poremećaja vida.",
+                            DiagnosedCondition = "Migrena",
+                            StatusObservation = "Neurološki pregled: uredan. Pupile jednake, reaguju na svetlo. Nema rigidnosti vrata. Krvni pritisak: 125/80 mmHg (normalan). Pacijent osećljiv na dodir leve temporalne regije.",
+                            Therapy = "Bromazepam, Brufen"
+                        });
+                });
+
             modelBuilder.Entity("Klinika.Models.Guardian", b =>
                 {
                     b.HasBaseType("Klinika.Models.Person");
@@ -1213,9 +1619,104 @@ namespace Klinika.Migrations
                     b.Property<int?>("GuardianId")
                         .HasColumnType("int");
 
+                    b.Property<int>("NoShowCount")
+                        .HasColumnType("int");
+
                     b.HasIndex("GuardianId");
 
                     b.ToTable("Patients", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 27,
+                            AddressId = 25,
+                            CreatedAt = new DateTime(2025, 1, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DateOfBirth = new DateTime(1995, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "marko.testic@example.com",
+                            FirstName = "Marko",
+                            Gender = "M",
+                            JMBG = "0101995800027",
+                            LastName = "Testić",
+                            PhoneNumber = "060-555-0001",
+                            BloodType = "A+",
+                            NoShowCount = 0
+                        },
+                        new
+                        {
+                            Id = 28,
+                            AddressId = 26,
+                            CreatedAt = new DateTime(2025, 1, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DateOfBirth = new DateTime(1992, 2, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "ana.jovic@example.com",
+                            FirstName = "Ana",
+                            Gender = "F",
+                            JMBG = "1502992700028",
+                            LastName = "Jović",
+                            PhoneNumber = "060-555-0002",
+                            BloodType = "A+",
+                            NoShowCount = 1
+                        },
+                        new
+                        {
+                            Id = 29,
+                            AddressId = 27,
+                            CreatedAt = new DateTime(2025, 1, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DateOfBirth = new DateTime(1998, 3, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "petar.petrovic@example.com",
+                            FirstName = "Petar",
+                            Gender = "M",
+                            JMBG = "2003998700029",
+                            LastName = "Petrović",
+                            PhoneNumber = "060-555-0003",
+                            BloodType = "A+",
+                            NoShowCount = 0
+                        },
+                        new
+                        {
+                            Id = 30,
+                            AddressId = 28,
+                            CreatedAt = new DateTime(2025, 1, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DateOfBirth = new DateTime(1993, 6, 12, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "jovana.milic@example.com",
+                            FirstName = "Jovana",
+                            Gender = "F",
+                            JMBG = "1206993700030",
+                            LastName = "Milić",
+                            PhoneNumber = "060-555-0004",
+                            BloodType = "A+",
+                            NoShowCount = 0
+                        },
+                        new
+                        {
+                            Id = 31,
+                            AddressId = 29,
+                            CreatedAt = new DateTime(2025, 1, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DateOfBirth = new DateTime(1996, 9, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "stefan.nikolic@example.com",
+                            FirstName = "Stefan",
+                            Gender = "M",
+                            JMBG = "0509996700031",
+                            LastName = "Nikolić",
+                            PhoneNumber = "060-555-0005",
+                            BloodType = "A+",
+                            NoShowCount = 2
+                        },
+                        new
+                        {
+                            Id = 32,
+                            AddressId = 29,
+                            CreatedAt = new DateTime(2025, 1, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DateOfBirth = new DateTime(1994, 1, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "milica.djordjevic@example.com",
+                            FirstName = "Milica",
+                            Gender = "F",
+                            JMBG = "2801994700032",
+                            LastName = "Đorđević",
+                            PhoneNumber = "060-555-0006",
+                            BloodType = "A+",
+                            NoShowCount = 0
+                        });
                 });
 
             modelBuilder.Entity("Klinika.Models.Worker", b =>
@@ -1749,6 +2250,49 @@ namespace Klinika.Migrations
                     b.Navigation("City");
                 });
 
+            modelBuilder.Entity("Klinika.Models.Appointment", b =>
+                {
+                    b.HasOne("Klinika.Models.AppointmentSlot", "AppointmentSlot")
+                        .WithOne("Appointment")
+                        .HasForeignKey("Klinika.Models.Appointment", "AppointmentSlotId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Klinika.Models.Worker", "BookedByWorker")
+                        .WithMany()
+                        .HasForeignKey("BookedByWorkerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Klinika.Models.Clinic", "Clinic")
+                        .WithMany()
+                        .HasForeignKey("ClinicId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Klinika.Models.Doctor", "Doctor")
+                        .WithMany()
+                        .HasForeignKey("DoctorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Klinika.Models.Patient", "Patient")
+                        .WithMany("Appointments")
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AppointmentSlot");
+
+                    b.Navigation("BookedByWorker");
+
+                    b.Navigation("Clinic");
+
+                    b.Navigation("Doctor");
+
+                    b.Navigation("Patient");
+                });
+
             modelBuilder.Entity("Klinika.Models.AppointmentSlot", b =>
                 {
                     b.HasOne("Klinika.Models.Doctor", "Doctor")
@@ -1848,6 +2392,11 @@ namespace Klinika.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Klinika.Models.AppointmentSlot", b =>
+                {
+                    b.Navigation("Appointment");
+                });
+
             modelBuilder.Entity("Klinika.Models.City", b =>
                 {
                     b.Navigation("Addresses");
@@ -1861,6 +2410,11 @@ namespace Klinika.Migrations
             modelBuilder.Entity("Klinika.Models.Guardian", b =>
                 {
                     b.Navigation("Children");
+                });
+
+            modelBuilder.Entity("Klinika.Models.Patient", b =>
+                {
+                    b.Navigation("Appointments");
                 });
 #pragma warning restore 612, 618
         }

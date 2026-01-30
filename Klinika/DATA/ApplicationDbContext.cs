@@ -21,6 +21,10 @@ namespace Klinika.DATA
         public DbSet<Address> Addresses { get; set; }
         public DbSet<City> Cities { get; set; }
         public DbSet<Clinic> Clinics { get; set; }
+        public DbSet<Appointment> Appointments { get; set; }
+        public DbSet<TreatmentAppointment> TreatmentAppointments { get; set; }
+        public DbSet<PreventiveAppointment> PreventiveAppointments { get; set; }
+
         // ❌ NO ClinicWorker DbSet
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -35,6 +39,7 @@ namespace Klinika.DATA
             modelBuilder.Entity<Address>().ToTable("Addresses");
             modelBuilder.Entity<City>().ToTable("Cities");
             modelBuilder.Entity<Clinic>().ToTable("Clinics");
+            modelBuilder.Entity<Appointment>().ToTable("Appointments");
 
             // Configure Person
             modelBuilder.Entity<Person>(entity =>
@@ -111,6 +116,73 @@ namespace Klinika.DATA
                       .WithMany(c => c.Workers)
                       .HasForeignKey(e => e.ClinicId)
                       .OnDelete(DeleteBehavior.SetNull); // If clinic deleted, worker remains but ClinicId = null
+            });
+
+            modelBuilder.Entity<Appointment>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                // TPH Discriminator - EF Core automatically uses AppointmentType
+                entity.HasDiscriminator<AppointmentType>("AppointmentType")
+                      .HasValue<TreatmentAppointment>(AppointmentType.Treatment)
+                      .HasValue<PreventiveAppointment>(AppointmentType.Preventive);
+
+                // Base properties
+                entity.Property(e => e.CancellationReason).HasMaxLength(500);
+
+                // Relationship to AppointmentSlot (One-to-One)
+                entity.HasOne(e => e.AppointmentSlot)
+                      .WithOne(s => s.Appointment)
+                      .HasForeignKey<Appointment>(e => e.AppointmentSlotId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                // Relationship to Patient (One-to-Many)
+                entity.HasOne(e => e.Patient)
+                      .WithMany(p => p.Appointments)
+                      .HasForeignKey(e => e.PatientId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                // Relationship to Doctor (One-to-Many)
+                entity.HasOne(e => e.Doctor)
+                      .WithMany()
+                      .HasForeignKey(e => e.DoctorId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                // Relationship to Clinic (One-to-Many)
+                entity.HasOne(e => e.Clinic)
+                      .WithMany()
+                      .HasForeignKey(e => e.ClinicId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                // Relationship to BookedByWorker (Secretary)
+                entity.HasOne(e => e.BookedByWorker)
+                      .WithMany()
+                      .HasForeignKey(e => e.BookedByWorkerId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                // Indexes for performance
+                entity.HasIndex(e => e.PatientId);
+                entity.HasIndex(e => e.DoctorId);
+                entity.HasIndex(e => e.ClinicId);
+                entity.HasIndex(e => e.ScheduledDate);
+                entity.HasIndex(e => new { e.DoctorId, e.ScheduledDate });
+            });
+
+            // Configure TreatmentAppointment (Derived class)
+            modelBuilder.Entity<TreatmentAppointment>(entity =>
+            {
+                // Remove .IsRequired() - these are filled by doctor on completion
+                entity.Property(e => e.Anamnesis).HasMaxLength(2000);
+                entity.Property(e => e.StatusObservation).HasMaxLength(2000);
+                entity.Property(e => e.Therapy).HasMaxLength(2000);
+                entity.Property(e => e.DiagnosedCondition).HasMaxLength(500);
+            });
+
+            // Configure PreventiveAppointment (Derived class)
+            modelBuilder.Entity<PreventiveAppointment>(entity =>
+            {
+                // Remove .IsRequired() - filled on completion
+                entity.Property(e => e.PreventiveNotes).HasMaxLength(2000);
             });
 
             // Seed Cities (add all 100 from before)
@@ -806,6 +878,257 @@ namespace Klinika.DATA
                     Qualification = "Medical Secretary Diploma",
                     CreatedAt = new DateTime(2024, 3, 20),
                     IsActive = true
+                }
+            );
+            modelBuilder.Entity<Patient>().HasData(
+                new Patient
+                {
+                    Id = 27,
+                    Email = "marko.testic@example.com",
+                    FirstName = "Marko",
+                    LastName = "Testić",
+                    PhoneNumber = "060-555-0001",
+                    JMBG = "0101995800027",
+                    Gender = "M",
+                    BloodType = "A+",
+                    DateOfBirth = new DateTime(1995, 1, 1),
+                    AddressId = 25, // Beograd
+                    NoShowCount = 0,
+                    CreatedAt = new DateTime(2025, 1, 20)
+                },
+                new Patient
+                {
+                    Id = 28,
+                    Email = "ana.jovic@example.com",
+                    FirstName = "Ana",
+                    LastName = "Jović",
+                    PhoneNumber = "060-555-0002",
+                    JMBG = "1502992700028",
+                    BloodType = "A+",
+                    Gender = "F",
+                    DateOfBirth = new DateTime(1992, 2, 15),
+                    AddressId = 26, // Beograd
+                    NoShowCount = 1, // Has 1 no-show
+                    CreatedAt = new DateTime(2025, 1, 20)
+                },
+                new Patient
+                {
+                    Id = 29,
+                    Email = "petar.petrovic@example.com",
+                    FirstName = "Petar",
+                    LastName = "Petrović",
+                    PhoneNumber = "060-555-0003",
+                    BloodType = "A+",
+                    JMBG = "2003998700029",
+                    Gender = "M",
+                    DateOfBirth = new DateTime(1998, 3, 20),
+                    AddressId = 27, // Novi Sad
+                    NoShowCount = 0,
+                    CreatedAt = new DateTime(2025, 1, 20)
+                },
+                new Patient
+                {
+                    Id = 30,
+                    Email = "jovana.milic@example.com",
+                    FirstName = "Jovana",
+                    LastName = "Milić",
+                    PhoneNumber = "060-555-0004",
+                    BloodType = "A+",
+                    JMBG = "1206993700030",
+                    Gender = "F",
+                    DateOfBirth = new DateTime(1993, 6, 12),
+                    AddressId = 28, // Novi Sad
+                    NoShowCount = 0,
+                    CreatedAt = new DateTime(2025, 1, 20)
+                },
+                new Patient
+                {
+                    Id = 31,
+                    Email = "stefan.nikolic@example.com",
+                    FirstName = "Stefan",
+                    LastName = "Nikolić",
+                    BloodType = "A+",
+                    PhoneNumber = "060-555-0005",
+                    JMBG = "0509996700031",
+                    Gender = "M",
+                    DateOfBirth = new DateTime(1996, 9, 5),
+                    AddressId = 29, // Niš
+                    NoShowCount = 2, // Has 2 no-shows
+                    CreatedAt = new DateTime(2025, 1, 20)
+                },
+                new Patient
+                {
+                    Id = 32,
+                    Email = "milica.djordjevic@example.com",
+                    FirstName = "Milica",
+                    LastName = "Đorđević",
+                    PhoneNumber = "060-555-0006",
+                    JMBG = "2801994700032",
+                    BloodType = "A+",
+                    Gender = "F",
+                    DateOfBirth = new DateTime(1994, 1, 28),
+                    AddressId = 29, // Niš
+                    NoShowCount = 0,
+                    CreatedAt = new DateTime(2025, 1, 20)
+                }
+            );
+
+            modelBuilder.Entity<AppointmentSlot>().HasData(
+                // February 10, 2026
+                new AppointmentSlot { Id = 1, DoctorId = 4, Date = new DateOnly(2026, 2, 10), StartTime = new TimeOnly(9, 0), EndTime = new TimeOnly(9, 15), IsAvailable = false },
+                new AppointmentSlot { Id = 2, DoctorId = 4, Date = new DateOnly(2026, 2, 10), StartTime = new TimeOnly(9, 15), EndTime = new TimeOnly(9, 30), IsAvailable = true },
+                new AppointmentSlot { Id = 3, DoctorId = 4, Date = new DateOnly(2026, 2, 10), StartTime = new TimeOnly(9, 30), EndTime = new TimeOnly(9, 45), IsAvailable = true },
+                new AppointmentSlot { Id = 4, DoctorId = 4, Date = new DateOnly(2026, 2, 10), StartTime = new TimeOnly(10, 0), EndTime = new TimeOnly(10, 15), IsAvailable = true },
+    
+                // February 11, 2026
+                new AppointmentSlot { Id = 5, DoctorId = 4, Date = new DateOnly(2026, 2, 11), StartTime = new TimeOnly(9, 0), EndTime = new TimeOnly(9, 15), IsAvailable = true },
+                new AppointmentSlot { Id = 6, DoctorId = 4, Date = new DateOnly(2026, 2, 11), StartTime = new TimeOnly(9, 15), EndTime = new TimeOnly(9, 30), IsAvailable = true },
+                new AppointmentSlot { Id = 7, DoctorId = 4, Date = new DateOnly(2026, 2, 11), StartTime = new TimeOnly(10, 0), EndTime = new TimeOnly(10, 15), IsAvailable = true },
+    
+                // February 12, 2026
+                new AppointmentSlot { Id = 8, DoctorId = 4, Date = new DateOnly(2026, 2, 12), StartTime = new TimeOnly(9, 0), EndTime = new TimeOnly(9, 15), IsAvailable = true },
+                new AppointmentSlot { Id = 9, DoctorId = 4, Date = new DateOnly(2026, 2, 12), StartTime = new TimeOnly(11, 0), EndTime = new TimeOnly(11, 15), IsAvailable = true }
+            );
+
+            // Slots for Dr. Ana Jovanović (Pediatrician, Beograd) - ID 5
+            modelBuilder.Entity<AppointmentSlot>().HasData(
+                new AppointmentSlot { Id = 10, DoctorId = 5, Date = new DateOnly(2026, 2, 10), StartTime = new TimeOnly(10, 0), EndTime = new TimeOnly(10, 15), IsAvailable = false },
+                new AppointmentSlot { Id = 11, DoctorId = 5, Date = new DateOnly(2026, 2, 10), StartTime = new TimeOnly(10, 15), EndTime = new TimeOnly(10, 30), IsAvailable = true },
+                new AppointmentSlot { Id = 12, DoctorId = 5, Date = new DateOnly(2026, 2, 10), StartTime = new TimeOnly(10, 30), EndTime = new TimeOnly(10, 45), IsAvailable = true },
+                new AppointmentSlot { Id = 13, DoctorId = 5, Date = new DateOnly(2026, 2, 11), StartTime = new TimeOnly(14, 0), EndTime = new TimeOnly(14, 15), IsAvailable = true },
+                new AppointmentSlot { Id = 14, DoctorId = 5, Date = new DateOnly(2026, 2, 11), StartTime = new TimeOnly(14, 15), EndTime = new TimeOnly(14, 30), IsAvailable = true }
+            );
+
+            // Slots for Dr. Jelena Popović (Neurologist, Novi Sad) - ID 9
+            modelBuilder.Entity<AppointmentSlot>().HasData(
+                new AppointmentSlot { Id = 15, DoctorId = 9, Date = new DateOnly(2026, 2, 10), StartTime = new TimeOnly(13, 0), EndTime = new TimeOnly(13, 15), IsAvailable = false },
+                new AppointmentSlot { Id = 16, DoctorId = 9, Date = new DateOnly(2026, 2, 10), StartTime = new TimeOnly(13, 15), EndTime = new TimeOnly(13, 30), IsAvailable = true },
+                new AppointmentSlot { Id = 17, DoctorId = 9, Date = new DateOnly(2026, 2, 11), StartTime = new TimeOnly(15, 0), EndTime = new TimeOnly(15, 15), IsAvailable = true },
+                new AppointmentSlot { Id = 18, DoctorId = 9, Date = new DateOnly(2026, 2, 11), StartTime = new TimeOnly(15, 15), EndTime = new TimeOnly(15, 30), IsAvailable = true }
+            );
+
+            // Slots for Dr. Aleksandra Ilić (Gynecologist, Niš) - ID 13
+            modelBuilder.Entity<AppointmentSlot>().HasData(
+                new AppointmentSlot { Id = 19, DoctorId = 13, Date = new DateOnly(2026, 2, 10), StartTime = new TimeOnly(11, 0), EndTime = new TimeOnly(11, 15), IsAvailable = true },
+                new AppointmentSlot { Id = 20, DoctorId = 13, Date = new DateOnly(2026, 2, 10), StartTime = new TimeOnly(11, 15), EndTime = new TimeOnly(11, 30), IsAvailable = true },
+                new AppointmentSlot { Id = 21, DoctorId = 13, Date = new DateOnly(2026, 2, 11), StartTime = new TimeOnly(9, 0), EndTime = new TimeOnly(9, 15), IsAvailable = true }
+            );
+
+            // ===============================================================
+            // SEED SAMPLE APPOINTMENTS (for testing different scenarios)
+            // ===============================================================
+
+            // Appointment 1: Treatment - COMPLETED
+            modelBuilder.Entity<TreatmentAppointment>().HasData(
+                new
+                {
+                    Id = 1,
+                    AppointmentSlotId = 1,
+                    PatientId = 27,
+                    ClinicId = 1,
+                    DoctorId = 4,
+                    AppointmentType = AppointmentType.Treatment,
+                    Status = AppointmentStatus.Completed,
+                    ScheduledDate = new DateOnly(2026, 2, 10),
+                    ScheduledStartTime = new TimeOnly(9, 0),
+                    ScheduledEndTime = new TimeOnly(9, 15),
+                    BookedAt = new DateTime(2026, 2, 1, 10, 30, 0),
+                    BookedByWorkerId = 20, // Secretary Jovana
+                    CheckedInAt = new DateTime(2026, 2, 10, 8, 55, 0),
+                    CompletedAt = new DateTime(2026, 2, 10, 9, 12, 0),
+                    Anamnesis = "Pacijent se žali na bol u grudima koji traje 2 dana, kratkoća daha tokom fizičke aktivnosti, povremeno vrtoglavica. Nema porodičnu istoriju srčanih oboljenja. Puši 10 cigareta dnevno poslednjih 5 godina.",
+                    StatusObservation = "Krvni pritisak: 145/95 mmHg (povišen), Puls: 88 otkucaja/min (blago ubrzan), Pacijent izgleda blago zabrinuto, osluškivanje srca pokazuje pravilne tonove bez šumova. EKG: blage promene u ST segmentu.",
+                    Therapy = "Propisano: Aspirin 100mg jednom dnevno, ACE inhibitor (Enalapril 5mg). Preporučeno: EKG test pod opterećenjem, smanjiti unos soli, umerena fizička aktivnost (šetnja 30min dnevno), prestanak pušenja. Kontrolni pregled za 2 nedelje.",
+                    DiagnosedCondition = "Blaga hipertenzija sa sumnjom na anginu pektoris"
+                }
+            );
+
+            // Appointment 2: Preventive - SCHEDULED (upcoming)
+            modelBuilder.Entity<PreventiveAppointment>().HasData(
+                new
+                {
+                    Id = 2,
+                    AppointmentSlotId = 10,
+                    PatientId = 28,
+                    ClinicId = 1,
+                    DoctorId = 5,
+                    AppointmentType = AppointmentType.Preventive,
+                    Status = AppointmentStatus.Scheduled,
+                    ScheduledDate = new DateOnly(2026, 2, 10),
+                    ScheduledStartTime = new TimeOnly(10, 0),
+                    ScheduledEndTime = new TimeOnly(10, 15),
+                    BookedAt = new DateTime(2026, 2, 3, 14, 20, 0),
+                    BookedByWorkerId = 20, // Secretary Jovana
+                    PreventiveNotes = "Prehlada"
+                }
+            );
+
+            // Appointment 3: Treatment - IN PROGRESS (being examined now)
+            modelBuilder.Entity<TreatmentAppointment>().HasData(
+                new
+                {
+                    Id = 3,
+                    AppointmentSlotId = 15,
+                    PatientId = 29,
+                    ClinicId = 2,
+                    DoctorId = 9,
+                    AppointmentType = AppointmentType.Treatment,
+                    Status = AppointmentStatus.InProgress,
+                    ScheduledDate = new DateOnly(2026, 2, 10),
+                    ScheduledStartTime = new TimeOnly(13, 0),
+                    ScheduledEndTime = new TimeOnly(13, 15),
+                    BookedAt = new DateTime(2026, 2, 2, 11, 0, 0),
+                    BookedByWorkerId = 22, // Secretary Sanja (Novi Sad)
+                    CheckedInAt = new DateTime(2026, 2, 10, 12, 58, 0),
+                    Anamnesis = "Pacijent ima jake glavobolje koje traju već nedelju dana, lokalizovane na levoj strani glave. Bol se pogoršava ujutru, praćen je mučninom. Svetlost i buka pogoršavaju simptome. Nema poremećaja vida.",
+                    StatusObservation = "Neurološki pregled: uredan. Pupile jednake, reaguju na svetlo. Nema rigidnosti vrata. Krvni pritisak: 125/80 mmHg (normalan). Pacijent osećljiv na dodir leve temporalne regije.",
+                    Therapy = "Bromazepam, Brufen", // Doctor hasn't filled this yet
+                    DiagnosedCondition = "Migrena" // Doctor hasn't filled this yet
+                }
+            );
+
+            // Appointment 4: Treatment - CANCELLED
+            modelBuilder.Entity<TreatmentAppointment>().HasData(
+                new
+                {
+                    Id = 4,
+                    AppointmentSlotId = 5,
+                    PatientId = 30,
+                    ClinicId = 1,
+                    DoctorId = 4,
+                    AppointmentType = AppointmentType.Treatment,
+                    Status = AppointmentStatus.Cancelled,
+                    ScheduledDate = new DateOnly(2026, 2, 11),
+                    ScheduledStartTime = new TimeOnly(9, 0),
+                    ScheduledEndTime = new TimeOnly(9, 15),
+                    BookedAt = new DateTime(2026, 1, 28, 9, 15, 0),
+                    BookedByWorkerId = 20,
+                    CancelledAt = new DateTime(2026, 2, 8, 16, 30, 0),
+                    CancellationReason = "Pacijent zatražio otkazivanje - zakazao posao u inostranstvu, neće biti u gradu",
+                    Anamnesis = "Pacijent ima jake glavobolje koje traju već nedelju dana, lokalizovane na levoj strani glave. Bol se pogoršava ujutru, praćen je mučninom. Svetlost i buka pogoršavaju simptome. Nema poremećaja vida.",
+                    StatusObservation = "Neurološki pregled: uredan. Pupile jednake, reaguju na svetlo. Nema rigidnosti vrata. Krvni pritisak: 125/80 mmHg (normalan). Pacijent osećljiv na dodir leve temporalne regije.",
+                    Therapy = "Bromazepam, Brufen", // Doctor hasn't filled this yet
+                    DiagnosedCondition = "Migrena" // Doctor hasn't filled this yet
+                }
+            );
+
+            // Appointment 5: Preventive - NO SHOW
+            modelBuilder.Entity<PreventiveAppointment>().HasData(
+                new
+                {
+                    Id = 5,
+                    AppointmentSlotId = 19,
+                    PatientId = 31,
+                    ClinicId = 3,
+                    DoctorId = 13,
+                    AppointmentType = AppointmentType.Preventive,
+                    Status = AppointmentStatus.NoShow,
+                    ScheduledDate = new DateOnly(2026, 2, 10),
+                    ScheduledStartTime = new TimeOnly(11, 0),
+                    ScheduledEndTime = new TimeOnly(11, 15),
+                    BookedAt = new DateTime(2026, 2, 1, 15, 45, 0),
+                    BookedByWorkerId = 24, // Secretary Milena (Niš)
+                    PreventiveNotes = "Ostati u krevetu ako se pojave simptomi prehlade ili gripa."
                 }
             );
         }

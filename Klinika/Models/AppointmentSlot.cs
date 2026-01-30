@@ -12,9 +12,12 @@ namespace Klinika.Models
         // Navigation property
         public Doctor Doctor { get; set; }
         
+        // One-to-One relationship with Appointment (base type)
+        public Appointment? Appointment { get; set; }
+        
         // Constants for validation
-        public static readonly TimeOnly WorkDayStart = new TimeOnly(8, 0);  // 8:00 AM
-        public static readonly TimeOnly WorkDayEnd = new TimeOnly(20, 0);   // 8:00 PM
+        public static readonly TimeOnly WorkDayStart = new TimeOnly(8, 0);
+        public static readonly TimeOnly WorkDayEnd = new TimeOnly(20, 0);
         public static readonly int SlotDurationMinutes = 15;
         
         // Validation method

@@ -1,4 +1,5 @@
 <Solution>
   <Project Path="HashGenerator/HashGenerator.csproj" Id="80fc1ed4-2ac7-4d8c-b9b8-5d86515f0081" />
+  <Project Path="Klinika.Tests/Klinika.Tests.csproj" Id="e468b6bf-9543-4184-8b5e-7ba10720879f" />
   <Project Path="Klinika/Klinika.csproj" />
 </Solution>
