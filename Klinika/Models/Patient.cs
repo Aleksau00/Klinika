@@ -9,5 +9,10 @@
 
         // Navigation to appointments (base type)
         public ICollection<Appointment> Appointments { get; set; }
+
+        // Many-to-many relationship with Allergens
+        public ICollection<PatientAllergen> PatientAllergens { get; set; } = new List<PatientAllergen>();
+
+        public ICollection<VaccinationRecord> VaccinationRecords { get; set; } = new List<VaccinationRecord>();
     }
 }

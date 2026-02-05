@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Klinika.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260130203615_AddAppointmentSystemWithInheritance")]
-    partial class AddAppointmentSystemWithInheritance
+    [Migration("20260202220117_InitialWithBabiesFinalHope")]
+    partial class InitialWithBabiesFinalHope
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -277,6 +277,115 @@ namespace Klinika.Migrations
                             CityId = 5,
                             StreetName = "Đure Cvejića",
                             StreetNumber = "8"
+                        },
+                        new
+                        {
+                            Id = 32,
+                            CityId = 1,
+                            StreetName = "Cara Lazara",
+                            StreetNumber = "55"
+                        },
+                        new
+                        {
+                            Id = 33,
+                            CityId = 1,
+                            StreetName = "Branislava Nušića",
+                            StreetNumber = "12"
+                        },
+                        new
+                        {
+                            Id = 34,
+                            CityId = 2,
+                            StreetName = "Svetog Save",
+                            StreetNumber = "8"
+                        },
+                        new
+                        {
+                            Id = 35,
+                            CityId = 3,
+                            StreetName = "Vojvode Stepe",
+                            StreetNumber = "23"
+                        });
+                });
+
+            modelBuilder.Entity("Klinika.Models.Allergen", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Allergens");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Alergija na penicilin i srodne antibiotike",
+                            Name = "Penicilin"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "Sezonska alergija na polen breze",
+                            Name = "Polen breze"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "Intolerancija na laktozu",
+                            Name = "Laktoza"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Description = "Alergija na kikiriki i proizvode sa kirikikijem",
+                            Name = "Kikiriki"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Description = "Alergija na jod i kontrastna sredstva",
+                            Name = "Jod"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Description = "Alergija na aspirin i NSAIL lekove",
+                            Name = "Aspirin"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Description = "Alergija na kućnu prašinu i grinje",
+                            Name = "Prašina"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Description = "Alergija na mačju dlaku",
+                            Name = "Mačja dlaka"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Description = "Alergija na sulfonamidne antibiotike",
+                            Name = "Sulfonamidi"
                         });
                 });
 
@@ -1407,6 +1516,91 @@ namespace Klinika.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Klinika.Models.PatientAllergen", b =>
+                {
+                    b.Property<int>("PatientId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AllergenId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("DiagnosedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("PatientId", "AllergenId");
+
+                    b.HasIndex("AllergenId");
+
+                    b.ToTable("PatientAllergens");
+
+                    b.HasData(
+                        new
+                        {
+                            PatientId = 27,
+                            AllergenId = 1,
+                            DiagnosedDate = new DateTime(2020, 3, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Notes = "Reakcija manifestovana osipom i crvenilom kože"
+                        },
+                        new
+                        {
+                            PatientId = 27,
+                            AllergenId = 2,
+                            DiagnosedDate = new DateTime(2018, 4, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Notes = "Simptomi kijanja i curenja nosa tokom proleća"
+                        },
+                        new
+                        {
+                            PatientId = 28,
+                            AllergenId = 3,
+                            DiagnosedDate = new DateTime(2019, 6, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Notes = "Izbegavati mlečne proizvode"
+                        },
+                        new
+                        {
+                            PatientId = 29,
+                            AllergenId = 4,
+                            DiagnosedDate = new DateTime(2015, 8, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Notes = "Ozbiljna reakcija, može izazvati anafilaksiju"
+                        },
+                        new
+                        {
+                            PatientId = 29,
+                            AllergenId = 5,
+                            DiagnosedDate = new DateTime(2021, 11, 12, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Notes = "Izbegavati kontrastna sredstva sa jodom"
+                        },
+                        new
+                        {
+                            PatientId = 29,
+                            AllergenId = 6,
+                            DiagnosedDate = new DateTime(2022, 2, 18, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            PatientId = 31,
+                            AllergenId = 7,
+                            DiagnosedDate = new DateTime(2017, 9, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Notes = "Otežano disanje u prašnjavim prostorima"
+                        },
+                        new
+                        {
+                            PatientId = 31,
+                            AllergenId = 8,
+                            DiagnosedDate = new DateTime(2019, 5, 30, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Notes = "Kijanje i suzenje očiju"
+                        },
+                        new
+                        {
+                            PatientId = 32,
+                            AllergenId = 9,
+                            DiagnosedDate = new DateTime(2020, 12, 8, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        });
+                });
+
             modelBuilder.Entity("Klinika.Models.Person", b =>
                 {
                     b.Property<int>("Id")
@@ -1425,7 +1619,6 @@ namespace Klinika.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
@@ -1457,21 +1650,278 @@ namespace Klinika.Migrations
                     b.HasIndex("AddressId");
 
                     b.HasIndex("Email")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[Email] IS NOT NULL");
 
                     b.ToTable("Persons", (string)null);
 
                     b.UseTptMappingStrategy();
                 });
 
+            modelBuilder.Entity("Klinika.Models.Vaccination", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Vaccinations");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Vakcina protiv COVID-19",
+                            Name = "COVID-19"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "Sezonska vakcina protiv gripa",
+                            Name = "Grip"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "Vakcina protiv hepatitisa B",
+                            Name = "Hepatitis B"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Description = "Vakcina protiv malih boginja, mumpsa i rubele",
+                            Name = "MMR"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Description = "Vakcina protiv tetanusa",
+                            Name = "Tetanus"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Description = "Vakcina protiv humanog papiloma virusa",
+                            Name = "HPV"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Description = "Vakcina protiv pneumokoka",
+                            Name = "Pneumokokna"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Description = "Vakcina protiv tuberkuloze",
+                            Name = "BCG"
+                        });
+                });
+
+            modelBuilder.Entity("Klinika.Models.VaccinationRecord", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AdministeredByDoctorId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("AdministeredDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int>("PatientId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PreventiveAppointmentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("VaccinationId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AdministeredByDoctorId");
+
+                    b.HasIndex("PatientId");
+
+                    b.HasIndex("PreventiveAppointmentId")
+                        .IsUnique()
+                        .HasFilter("[PreventiveAppointmentId] IS NOT NULL");
+
+                    b.HasIndex("VaccinationId");
+
+                    b.ToTable("VaccinationRecords");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            AdministeredByDoctorId = 4,
+                            AdministeredDate = new DateTime(2024, 10, 15, 14, 30, 0, 0, DateTimeKind.Unspecified),
+                            Notes = "Prva doza COVID-19 vakcine. Pacijent dobro podnosi, bez neželjenih reakcija.",
+                            PatientId = 27,
+                            VaccinationId = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            AdministeredByDoctorId = 4,
+                            AdministeredDate = new DateTime(2023, 3, 20, 10, 15, 0, 0, DateTimeKind.Unspecified),
+                            Notes = "Revakcinacija protiv tetanusa nakon male povrede.",
+                            PatientId = 27,
+                            VaccinationId = 5
+                        },
+                        new
+                        {
+                            Id = 3,
+                            AdministeredByDoctorId = 5,
+                            AdministeredDate = new DateTime(2024, 11, 5, 9, 0, 0, 0, DateTimeKind.Unspecified),
+                            Notes = "Sezonska vakcina protiv gripa 2024/2025.",
+                            PatientId = 28,
+                            VaccinationId = 2
+                        },
+                        new
+                        {
+                            Id = 4,
+                            AdministeredByDoctorId = 9,
+                            AdministeredDate = new DateTime(2024, 9, 12, 11, 30, 0, 0, DateTimeKind.Unspecified),
+                            Notes = "Booster doza COVID-19 vakcine.",
+                            PatientId = 29,
+                            VaccinationId = 1
+                        },
+                        new
+                        {
+                            Id = 5,
+                            AdministeredByDoctorId = 9,
+                            AdministeredDate = new DateTime(2022, 5, 18, 14, 0, 0, 0, DateTimeKind.Unspecified),
+                            Notes = "Hepatitis B vakcina - treća doza.",
+                            PatientId = 29,
+                            VaccinationId = 3
+                        },
+                        new
+                        {
+                            Id = 6,
+                            AdministeredByDoctorId = 13,
+                            AdministeredDate = new DateTime(2023, 7, 22, 15, 45, 0, 0, DateTimeKind.Unspecified),
+                            Notes = "Prva doza HPV vakcine.",
+                            PatientId = 30,
+                            VaccinationId = 6
+                        },
+                        new
+                        {
+                            Id = 7,
+                            AdministeredByDoctorId = 13,
+                            AdministeredDate = new DateTime(2024, 10, 28, 10, 0, 0, 0, DateTimeKind.Unspecified),
+                            Notes = "Sezonska vakcina protiv gripa.",
+                            PatientId = 31,
+                            VaccinationId = 2
+                        },
+                        new
+                        {
+                            Id = 8,
+                            AdministeredByDoctorId = 13,
+                            AdministeredDate = new DateTime(2021, 8, 10, 13, 20, 0, 0, DateTimeKind.Unspecified),
+                            Notes = "Standardna revakcinacija protiv tetanusa.",
+                            PatientId = 31,
+                            VaccinationId = 5
+                        },
+                        new
+                        {
+                            Id = 9,
+                            AdministeredByDoctorId = 13,
+                            AdministeredDate = new DateTime(2020, 1, 15, 9, 30, 0, 0, DateTimeKind.Unspecified),
+                            Notes = "MMR vakcina - revakcinacija.",
+                            PatientId = 32,
+                            VaccinationId = 4
+                        },
+                        new
+                        {
+                            Id = 10,
+                            AdministeredByDoctorId = 13,
+                            AdministeredDate = new DateTime(2024, 12, 3, 16, 0, 0, 0, DateTimeKind.Unspecified),
+                            Notes = "COVID-19 vakcina - booster doza za zimu 2024/2025.",
+                            PatientId = 32,
+                            VaccinationId = 1
+                        },
+                        new
+                        {
+                            Id = 11,
+                            AdministeredByDoctorId = 5,
+                            AdministeredDate = new DateTime(2025, 7, 16, 10, 0, 0, 0, DateTimeKind.Unspecified),
+                            Notes = "BCG vakcina pri rođenju. Beba dobro podnela.",
+                            PatientId = 39,
+                            VaccinationId = 8
+                        },
+                        new
+                        {
+                            Id = 12,
+                            AdministeredByDoctorId = 5,
+                            AdministeredDate = new DateTime(2025, 7, 16, 10, 5, 0, 0, DateTimeKind.Unspecified),
+                            Notes = "Hepatitis B - prva doza odmah nakon rođenja.",
+                            PatientId = 39,
+                            VaccinationId = 3
+                        },
+                        new
+                        {
+                            Id = 13,
+                            AdministeredByDoctorId = 5,
+                            AdministeredDate = new DateTime(2025, 4, 11, 9, 30, 0, 0, DateTimeKind.Unspecified),
+                            Notes = "BCG vakcina pri rođenju.",
+                            PatientId = 40,
+                            VaccinationId = 8
+                        },
+                        new
+                        {
+                            Id = 14,
+                            AdministeredByDoctorId = 5,
+                            AdministeredDate = new DateTime(2025, 4, 11, 9, 35, 0, 0, DateTimeKind.Unspecified),
+                            Notes = "Hepatitis B - prva doza.",
+                            PatientId = 40,
+                            VaccinationId = 3
+                        });
+                });
+
             modelBuilder.Entity("Klinika.Models.PreventiveAppointment", b =>
                 {
                     b.HasBaseType("Klinika.Models.Appointment");
 
-                    b.Property<string>("PreventiveNotes")
-                        .IsRequired()
+                    b.Property<string>("ChildDevelopmentNotes")
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
+
+                    b.Property<bool>("IsVaccination")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("PreventiveNotes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<int?>("VaccinationId")
+                        .HasColumnType("int");
+
+                    b.HasIndex("VaccinationId");
 
                     b.HasDiscriminator().HasValue(0);
 
@@ -1490,6 +1940,7 @@ namespace Klinika.Migrations
                             ScheduledEndTime = new TimeOnly(10, 15, 0),
                             ScheduledStartTime = new TimeOnly(10, 0, 0),
                             Status = 0,
+                            IsVaccination = false,
                             PreventiveNotes = "Prehlada"
                         },
                         new
@@ -1506,7 +1957,102 @@ namespace Klinika.Migrations
                             ScheduledEndTime = new TimeOnly(11, 15, 0),
                             ScheduledStartTime = new TimeOnly(11, 0, 0),
                             Status = 4,
+                            IsVaccination = false,
                             PreventiveNotes = "Ostati u krevetu ako se pojave simptomi prehlade ili gripa."
+                        },
+                        new
+                        {
+                            Id = 6,
+                            AppointmentSlotId = 11,
+                            AppointmentType = 0,
+                            BookedAt = new DateTime(2025, 10, 1, 9, 0, 0, 0, DateTimeKind.Unspecified),
+                            BookedByWorkerId = 20,
+                            CheckedInAt = new DateTime(2025, 10, 15, 10, 10, 0, 0, DateTimeKind.Unspecified),
+                            ClinicId = 1,
+                            CompletedAt = new DateTime(2025, 10, 15, 10, 28, 0, 0, DateTimeKind.Unspecified),
+                            DoctorId = 5,
+                            PatientId = 39,
+                            ScheduledDate = new DateOnly(2025, 10, 15),
+                            ScheduledEndTime = new TimeOnly(10, 30, 0),
+                            ScheduledStartTime = new TimeOnly(10, 15, 0),
+                            Status = 2,
+                            ChildDevelopmentNotes = "Beba Sara - 3 meseca: Odličan napredak. Težina: 5.8 kg, dužina: 60 cm. Drži glavicu samostalno, prati predmete očima, osmehuje se na glas roditelja. Reaguje na zvukove. Počinje da grabi igračke. Preporučeno: nastaviti dojenje, uvesti vitamin D3. Sledeći pregled za 3 meseca.",
+                            IsVaccination = false,
+                            PreventiveNotes = "Redovna kontrola razvoja deteta u 3. mesecu života."
+                        },
+                        new
+                        {
+                            Id = 7,
+                            AppointmentSlotId = 13,
+                            AppointmentType = 0,
+                            BookedAt = new DateTime(2025, 12, 20, 11, 30, 0, 0, DateTimeKind.Unspecified),
+                            BookedByWorkerId = 20,
+                            ClinicId = 1,
+                            DoctorId = 5,
+                            PatientId = 39,
+                            ScheduledDate = new DateOnly(2026, 1, 15),
+                            ScheduledEndTime = new TimeOnly(14, 15, 0),
+                            ScheduledStartTime = new TimeOnly(14, 0, 0),
+                            Status = 0,
+                            IsVaccination = false,
+                            PreventiveNotes = "Šestomesečna kontrola razvoja i eventualna vakcinacija."
+                        },
+                        new
+                        {
+                            Id = 8,
+                            AppointmentSlotId = 12,
+                            AppointmentType = 0,
+                            BookedAt = new DateTime(2025, 6, 25, 14, 0, 0, 0, DateTimeKind.Unspecified),
+                            BookedByWorkerId = 20,
+                            CheckedInAt = new DateTime(2025, 7, 10, 10, 25, 0, 0, DateTimeKind.Unspecified),
+                            ClinicId = 1,
+                            CompletedAt = new DateTime(2025, 7, 10, 10, 43, 0, 0, DateTimeKind.Unspecified),
+                            DoctorId = 5,
+                            PatientId = 40,
+                            ScheduledDate = new DateOnly(2025, 7, 10),
+                            ScheduledEndTime = new TimeOnly(10, 45, 0),
+                            ScheduledStartTime = new TimeOnly(10, 30, 0),
+                            Status = 2,
+                            ChildDevelopmentNotes = "Beba David - 3 meseca: Normalan razvoj. Težina: 6.2 kg, dužina: 62 cm. Dobro drži glavu, aktivno pomera ruke i noge. Pravi glasove (gugutanje). Prepoznaje roditelje. Spava 4-5 sati noću. Preporučeno: nastaviti dojenje ili adaptirano mleko, vitamin D3.",
+                            IsVaccination = false,
+                            PreventiveNotes = "Kontrola razvoja u 3. mesecu."
+                        },
+                        new
+                        {
+                            Id = 9,
+                            AppointmentSlotId = 14,
+                            AppointmentType = 0,
+                            BookedAt = new DateTime(2025, 9, 25, 10, 15, 0, 0, DateTimeKind.Unspecified),
+                            BookedByWorkerId = 20,
+                            CheckedInAt = new DateTime(2025, 10, 10, 14, 10, 0, 0, DateTimeKind.Unspecified),
+                            ClinicId = 1,
+                            CompletedAt = new DateTime(2025, 10, 10, 14, 27, 0, 0, DateTimeKind.Unspecified),
+                            DoctorId = 5,
+                            PatientId = 40,
+                            ScheduledDate = new DateOnly(2025, 10, 10),
+                            ScheduledEndTime = new TimeOnly(14, 30, 0),
+                            ScheduledStartTime = new TimeOnly(14, 15, 0),
+                            Status = 2,
+                            ChildDevelopmentNotes = "Beba David - 6 meseci: Odličan napredak. Težina: 8.1 kg, dužina: 68 cm. Sedi uz potporu, okreće se sa stomaka na leđa i obrnuto. Hvata igračke objema rukama, prebacuje iz ruke u ruku. Brblja (ma-ma, ba-ba). Počinje zanimanje za čvrstu hranu. Preporučeno: uvesti kašice (povrće, voće), nastaviti dojenje.",
+                            IsVaccination = false,
+                            PreventiveNotes = "Šestomesečna kontrola."
+                        },
+                        new
+                        {
+                            Id = 10,
+                            AppointmentSlotId = 2,
+                            AppointmentType = 0,
+                            BookedAt = new DateTime(2025, 12, 15, 13, 45, 0, 0, DateTimeKind.Unspecified),
+                            BookedByWorkerId = 20,
+                            ClinicId = 1,
+                            DoctorId = 5,
+                            PatientId = 40,
+                            ScheduledDate = new DateOnly(2026, 1, 10),
+                            ScheduledEndTime = new TimeOnly(9, 30, 0),
+                            ScheduledStartTime = new TimeOnly(9, 15, 0),
+                            Status = 0,
+                            IsVaccination = false,
+                            PreventiveNotes = "Devetomesečna kontrola razvoja."
                         });
                 });
 
@@ -1515,22 +2061,18 @@ namespace Klinika.Migrations
                     b.HasBaseType("Klinika.Models.Appointment");
 
                     b.Property<string>("Anamnesis")
-                        .IsRequired()
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
                     b.Property<string>("DiagnosedCondition")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("StatusObservation")
-                        .IsRequired()
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
                     b.Property<string>("Therapy")
-                        .IsRequired()
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
@@ -1606,6 +2148,60 @@ namespace Klinika.Migrations
                     b.HasBaseType("Klinika.Models.Person");
 
                     b.ToTable("Guardians", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 33,
+                            AddressId = 32,
+                            CreatedAt = new DateTime(2025, 1, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DateOfBirth = new DateTime(1985, 8, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "milena.testic@example.com",
+                            FirstName = "Milena",
+                            Gender = "F",
+                            JMBG = "1508985700033",
+                            LastName = "Testić",
+                            PhoneNumber = "060-888-0001"
+                        },
+                        new
+                        {
+                            Id = 34,
+                            AddressId = 33,
+                            CreatedAt = new DateTime(2025, 1, 11, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DateOfBirth = new DateTime(1983, 3, 22, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "igor.petrovic@example.com",
+                            FirstName = "Igor",
+                            Gender = "M",
+                            JMBG = "2203983700034",
+                            LastName = "Petrović",
+                            PhoneNumber = "060-888-0002"
+                        },
+                        new
+                        {
+                            Id = 35,
+                            AddressId = 34,
+                            CreatedAt = new DateTime(2025, 1, 12, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DateOfBirth = new DateTime(1990, 12, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "sandra.jovanovic@example.com",
+                            FirstName = "Sandra",
+                            Gender = "F",
+                            JMBG = "0812990700035",
+                            LastName = "Jovanović",
+                            PhoneNumber = "060-888-0003"
+                        },
+                        new
+                        {
+                            Id = 36,
+                            AddressId = 35,
+                            CreatedAt = new DateTime(2025, 1, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DateOfBirth = new DateTime(1988, 5, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "darko.nikolic@example.com",
+                            FirstName = "Darko",
+                            Gender = "M",
+                            JMBG = "1505988700036",
+                            LastName = "Nikolić",
+                            PhoneNumber = "060-888-0004"
+                        });
                 });
 
             modelBuilder.Entity("Klinika.Models.Patient", b =>
@@ -1715,6 +2311,67 @@ namespace Klinika.Migrations
                             LastName = "Đorđević",
                             PhoneNumber = "060-555-0006",
                             BloodType = "A+",
+                            NoShowCount = 0
+                        },
+                        new
+                        {
+                            Id = 37,
+                            AddressId = 32,
+                            CreatedAt = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DateOfBirth = new DateTime(2011, 5, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "luka.testic@example.com",
+                            FirstName = "Luka",
+                            Gender = "M",
+                            JMBG = "1505201100037",
+                            LastName = "Testić",
+                            PhoneNumber = "060-555-0007",
+                            BloodType = "A+",
+                            GuardianId = 33,
+                            NoShowCount = 0
+                        },
+                        new
+                        {
+                            Id = 38,
+                            AddressId = 33,
+                            CreatedAt = new DateTime(2023, 8, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DateOfBirth = new DateTime(2023, 8, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FirstName = "Nikola",
+                            Gender = "M",
+                            JMBG = "1008202300038",
+                            LastName = "Petrović",
+                            PhoneNumber = "060-555-0008",
+                            BloodType = "O+",
+                            GuardianId = 34,
+                            NoShowCount = 0
+                        },
+                        new
+                        {
+                            Id = 39,
+                            AddressId = 34,
+                            CreatedAt = new DateTime(2025, 7, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DateOfBirth = new DateTime(2025, 7, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FirstName = "Sara",
+                            Gender = "F",
+                            JMBG = "1507202500039",
+                            LastName = "Jovanović",
+                            PhoneNumber = "060-555-0009",
+                            BloodType = "A+",
+                            GuardianId = 35,
+                            NoShowCount = 0
+                        },
+                        new
+                        {
+                            Id = 40,
+                            AddressId = 35,
+                            CreatedAt = new DateTime(2025, 4, 11, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DateOfBirth = new DateTime(2025, 4, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FirstName = "David",
+                            Gender = "M",
+                            JMBG = "1004202500040",
+                            LastName = "Nikolić",
+                            PhoneNumber = "060-555-0010",
+                            BloodType = "B+",
+                            GuardianId = 36,
                             NoShowCount = 0
                         });
                 });
@@ -2315,6 +2972,25 @@ namespace Klinika.Migrations
                     b.Navigation("Address");
                 });
 
+            modelBuilder.Entity("Klinika.Models.PatientAllergen", b =>
+                {
+                    b.HasOne("Klinika.Models.Allergen", "Allergen")
+                        .WithMany("PatientAllergens")
+                        .HasForeignKey("AllergenId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Klinika.Models.Patient", "Patient")
+                        .WithMany("PatientAllergens")
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Allergen");
+
+                    b.Navigation("Patient");
+                });
+
             modelBuilder.Entity("Klinika.Models.Person", b =>
                 {
                     b.HasOne("Klinika.Models.Address", "Address")
@@ -2325,12 +3001,56 @@ namespace Klinika.Migrations
                     b.Navigation("Address");
                 });
 
+            modelBuilder.Entity("Klinika.Models.VaccinationRecord", b =>
+                {
+                    b.HasOne("Klinika.Models.Doctor", "AdministeredByDoctor")
+                        .WithMany()
+                        .HasForeignKey("AdministeredByDoctorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Klinika.Models.Patient", "Patient")
+                        .WithMany("VaccinationRecords")
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Klinika.Models.PreventiveAppointment", "PreventiveAppointment")
+                        .WithOne("VaccinationRecord")
+                        .HasForeignKey("Klinika.Models.VaccinationRecord", "PreventiveAppointmentId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Klinika.Models.Vaccination", "Vaccination")
+                        .WithMany("VaccinationRecords")
+                        .HasForeignKey("VaccinationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AdministeredByDoctor");
+
+                    b.Navigation("Patient");
+
+                    b.Navigation("PreventiveAppointment");
+
+                    b.Navigation("Vaccination");
+                });
+
+            modelBuilder.Entity("Klinika.Models.PreventiveAppointment", b =>
+                {
+                    b.HasOne("Klinika.Models.Vaccination", "Vaccination")
+                        .WithMany()
+                        .HasForeignKey("VaccinationId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Vaccination");
+                });
+
             modelBuilder.Entity("Klinika.Models.Guardian", b =>
                 {
                     b.HasOne("Klinika.Models.Person", null)
                         .WithOne()
                         .HasForeignKey("Klinika.Models.Guardian", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
@@ -2338,12 +3058,13 @@ namespace Klinika.Migrations
                 {
                     b.HasOne("Klinika.Models.Guardian", "Guardian")
                         .WithMany("Children")
-                        .HasForeignKey("GuardianId");
+                        .HasForeignKey("GuardianId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("Klinika.Models.Person", null)
                         .WithOne()
                         .HasForeignKey("Klinika.Models.Patient", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Guardian");
@@ -2359,7 +3080,7 @@ namespace Klinika.Migrations
                     b.HasOne("Klinika.Models.Person", null)
                         .WithOne()
                         .HasForeignKey("Klinika.Models.Worker", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Clinic");
@@ -2392,6 +3113,11 @@ namespace Klinika.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Klinika.Models.Allergen", b =>
+                {
+                    b.Navigation("PatientAllergens");
+                });
+
             modelBuilder.Entity("Klinika.Models.AppointmentSlot", b =>
                 {
                     b.Navigation("Appointment");
@@ -2407,6 +3133,16 @@ namespace Klinika.Migrations
                     b.Navigation("Workers");
                 });
 
+            modelBuilder.Entity("Klinika.Models.Vaccination", b =>
+                {
+                    b.Navigation("VaccinationRecords");
+                });
+
+            modelBuilder.Entity("Klinika.Models.PreventiveAppointment", b =>
+                {
+                    b.Navigation("VaccinationRecord");
+                });
+
             modelBuilder.Entity("Klinika.Models.Guardian", b =>
                 {
                     b.Navigation("Children");
@@ -2415,6 +3151,10 @@ namespace Klinika.Migrations
             modelBuilder.Entity("Klinika.Models.Patient", b =>
                 {
                     b.Navigation("Appointments");
+
+                    b.Navigation("PatientAllergens");
+
+                    b.Navigation("VaccinationRecords");
                 });
 #pragma warning restore 612, 618
         }

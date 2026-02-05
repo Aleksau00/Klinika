@@ -58,6 +58,10 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAppointmentSlotService, AppointmentSlotService>();
 builder.Services.AddScoped<IClinicService, ClinicService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>(); // NEW
+builder.Services.AddScoped<IAllergenRepository, AllergenRepository>();
+builder.Services.AddScoped<IAllergenService, AllergenService>();
+builder.Services.AddScoped<IVaccinationRepository, VaccinationRepository>();
+builder.Services.AddScoped<IVaccinationService, VaccinationService>();
 
 // JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

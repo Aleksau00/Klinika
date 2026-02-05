@@ -24,6 +24,10 @@ namespace Klinika.DATA
         public DbSet<Appointment> Appointments { get; set; }
         public DbSet<TreatmentAppointment> TreatmentAppointments { get; set; }
         public DbSet<PreventiveAppointment> PreventiveAppointments { get; set; }
+        public DbSet<Allergen> Allergens { get; set; }
+        public DbSet<PatientAllergen> PatientAllergens { get; set; }
+        public DbSet<Vaccination> Vaccinations { get; set; }
+        public DbSet<VaccinationRecord> VaccinationRecords { get; set; }
 
         // ❌ NO ClinicWorker DbSet
 
@@ -46,7 +50,7 @@ namespace Klinika.DATA
             {
                 entity.HasKey(e => e.Id);
                 entity.HasIndex(e => e.Email).IsUnique();
-                entity.Property(e => e.Email).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Email).HasMaxLength(100);
                 entity.Property(e => e.FirstName).IsRequired().HasMaxLength(50);
                 entity.Property(e => e.LastName).IsRequired().HasMaxLength(50);
                 entity.Property(e => e.JMBG).HasMaxLength(20);
@@ -55,6 +59,53 @@ namespace Klinika.DATA
                       .WithMany()
                       .HasForeignKey(e => e.AddressId)
                       .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            // ✅ ADD THIS: Configure TPT inheritance delete behavior
+            modelBuilder.Entity<Worker>()
+                .HasOne<Person>()
+                .WithOne()
+                .HasForeignKey<Worker>(w => w.Id)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Patient>()
+                .HasOne<Person>()
+                .WithOne()
+                .HasForeignKey<Patient>(p => p.Id)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Guardian>()
+                .HasOne<Person>()
+                .WithOne()
+                .HasForeignKey<Guardian>(g => g.Id)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure PreventiveAppointment (Derived class)
+
+
+            modelBuilder.Entity<Allergen>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.Description).HasMaxLength(500);
+                entity.HasIndex(e => e.Name).IsUnique(); // Ensure allergen names are unique
+            });
+
+            modelBuilder.Entity<PatientAllergen>(entity =>
+            {
+                entity.HasKey(pa => new { pa.PatientId, pa.AllergenId }); // Composite key
+
+                entity.HasOne(pa => pa.Patient)
+                      .WithMany(p => p.PatientAllergens)
+                      .HasForeignKey(pa => pa.PatientId)
+                      .OnDelete(DeleteBehavior.Restrict); // ✅ Changed from Cascade
+
+                entity.HasOne(pa => pa.Allergen)
+                      .WithMany(a => a.PatientAllergens)
+                      .HasForeignKey(pa => pa.AllergenId)
+                      .OnDelete(DeleteBehavior.Restrict); // ✅ Changed from Cascade
+
+                entity.Property(pa => pa.Notes).HasMaxLength(500);
             });
 
             // Configure Address
@@ -178,12 +229,76 @@ namespace Klinika.DATA
                 entity.Property(e => e.DiagnosedCondition).HasMaxLength(500);
             });
 
-            // Configure PreventiveAppointment (Derived class)
             modelBuilder.Entity<PreventiveAppointment>(entity =>
             {
-                // Remove .IsRequired() - filled on completion
                 entity.Property(e => e.PreventiveNotes).HasMaxLength(2000);
+                entity.Property(e => e.ChildDevelopmentNotes).HasMaxLength(2000);
+
+                entity.HasOne(e => e.Vaccination)
+                      .WithMany()
+                      .HasForeignKey(e => e.VaccinationId)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
+
+            modelBuilder.Entity<Vaccination>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.Description).HasMaxLength(500);
+                entity.HasIndex(e => e.Name).IsUnique();
+            });
+
+            modelBuilder.Entity<VaccinationRecord>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Notes).HasMaxLength(1000);
+
+                entity.HasOne(e => e.Patient)
+                      .WithMany(p => p.VaccinationRecords)
+                      .HasForeignKey(e => e.PatientId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.Vaccination)
+                      .WithMany(v => v.VaccinationRecords)
+                      .HasForeignKey(e => e.VaccinationId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.AdministeredByDoctor)
+                      .WithMany()
+                      .HasForeignKey(e => e.AdministeredByDoctorId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.PreventiveAppointment)
+                      .WithOne(pa => pa.VaccinationRecord)
+                      .HasForeignKey<VaccinationRecord>(e => e.PreventiveAppointmentId)
+                      .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasIndex(e => e.PatientId);
+            });
+
+
+            modelBuilder.Entity<Allergen>().HasData(
+                new Allergen { Id = 1, Name = "Penicilin", Description = "Alergija na penicilin i srodne antibiotike" },
+                new Allergen { Id = 2, Name = "Polen breze", Description = "Sezonska alergija na polen breze" },
+                new Allergen { Id = 3, Name = "Laktoza", Description = "Intolerancija na laktozu" },
+                new Allergen { Id = 4, Name = "Kikiriki", Description = "Alergija na kikiriki i proizvode sa kirikikijem" },
+                new Allergen { Id = 5, Name = "Jod", Description = "Alergija na jod i kontrastna sredstva" },
+                new Allergen { Id = 6, Name = "Aspirin", Description = "Alergija na aspirin i NSAIL lekove" },
+                new Allergen { Id = 7, Name = "Prašina", Description = "Alergija na kućnu prašinu i grinje" },
+                new Allergen { Id = 8, Name = "Mačja dlaka", Description = "Alergija na mačju dlaku" },
+                new Allergen { Id = 9, Name = "Sulfonamidi", Description = "Alergija na sulfonamidne antibiotike" }
+            );
+
+            modelBuilder.Entity<Vaccination>().HasData(
+                new Vaccination { Id = 1, Name = "COVID-19", Description = "Vakcina protiv COVID-19" },
+                new Vaccination { Id = 2, Name = "Grip", Description = "Sezonska vakcina protiv gripa" },
+                new Vaccination { Id = 3, Name = "Hepatitis B", Description = "Vakcina protiv hepatitisa B" },
+                new Vaccination { Id = 4, Name = "MMR", Description = "Vakcina protiv malih boginja, mumpsa i rubele" },
+                new Vaccination { Id = 5, Name = "Tetanus", Description = "Vakcina protiv tetanusa" },
+                new Vaccination { Id = 6, Name = "HPV", Description = "Vakcina protiv humanog papiloma virusa" },
+                new Vaccination { Id = 7, Name = "Pneumokokna", Description = "Vakcina protiv pneumokoka" },
+                new Vaccination { Id = 8, Name = "BCG", Description = "Vakcina protiv tuberkuloze" }
+            );
 
             // Seed Cities (add all 100 from before)
             modelBuilder.Entity<City>().HasData(
@@ -336,8 +451,14 @@ namespace Klinika.DATA
                 new Address { Id = 28, StreetName = "Laze Nančića", StreetNumber = "16", CityId = 2 },
                 new Address { Id = 29, StreetName = "Vožda Karađorđa", StreetNumber = "23", CityId = 3 },
                 new Address { Id = 30, StreetName = "Radničke brigade", StreetNumber = "31", CityId = 4 },
-                new Address { Id = 31, StreetName = "Đure Cvejića", StreetNumber = "8", CityId = 5 }
-            );
+                new Address { Id = 31, StreetName = "Đure Cvejića", StreetNumber = "8", CityId = 5 },
+
+                // Guardian Addresses - ADD THESE!
+                new Address { Id = 32, StreetName = "Cara Lazara", StreetNumber = "55", CityId = 1 },
+                new Address { Id = 33, StreetName = "Branislava Nušića", StreetNumber = "12", CityId = 1 },
+                new Address { Id = 34, StreetName = "Svetog Save", StreetNumber = "8", CityId = 2 },
+                new Address { Id = 35, StreetName = "Vojvode Stepe", StreetNumber = "23", CityId = 3 }
+                );
 
             // Seed Clinics
             modelBuilder.Entity<Clinic>().HasData(
@@ -880,6 +1001,71 @@ namespace Klinika.DATA
                     IsActive = true
                 }
             );
+            // Seed Guardians
+            // Seed Guardians
+            modelBuilder.Entity<Guardian>().HasData(
+                new Guardian
+                {
+                    Id = 33,
+                    Email = "milena.testic@example.com",
+                    FirstName = "Milena",
+                    LastName = "Testić",
+                    PhoneNumber = "060-888-0001",
+                    JMBG = "1508985700033",
+                    Gender = "F",
+                    DateOfBirth = new DateTime(1985, 8, 15),
+                    AddressId = 32,
+                    CreatedAt = new DateTime(2025, 1, 10)
+                },
+                new Guardian
+                {
+                    Id = 34,
+                    Email = "igor.petrovic@example.com",
+                    FirstName = "Igor",
+                    LastName = "Petrović",
+                    PhoneNumber = "060-888-0002",
+                    JMBG = "2203983700034",
+                    Gender = "M",
+                    DateOfBirth = new DateTime(1983, 3, 22),
+                    AddressId = 33,
+                    CreatedAt = new DateTime(2025, 1, 11)
+                },
+                new Guardian
+                {
+                    Id = 35,
+                    Email = "sandra.jovanovic@example.com",
+                    FirstName = "Sandra",
+                    LastName = "Jovanović",
+                    PhoneNumber = "060-888-0003",
+                    JMBG = "0812990700035",
+                    Gender = "F",
+                    DateOfBirth = new DateTime(1990, 12, 8),
+                    AddressId = 34,
+                    CreatedAt = new DateTime(2025, 1, 12)
+                },
+                new Guardian
+                {
+                    Id = 36,
+                    Email = "darko.nikolic@example.com",
+                    FirstName = "Darko",
+                    LastName = "Nikolić",
+                    PhoneNumber = "060-888-0004",
+                    JMBG = "1505988700036",
+                    Gender = "M",
+                    DateOfBirth = new DateTime(1988, 5, 15),
+                    AddressId = 35,
+                    CreatedAt = new DateTime(2025, 1, 13)
+                }
+            );
+            // Configure Patient-Guardian relationship
+            modelBuilder.Entity<Patient>(entity =>
+            {
+                entity.HasOne(p => p.Guardian)
+                      .WithMany(g => g.Children)
+                      .HasForeignKey(p => p.GuardianId)
+                      .OnDelete(DeleteBehavior.SetNull);
+            });
+
             modelBuilder.Entity<Patient>().HasData(
                 new Patient
                 {
@@ -970,7 +1156,75 @@ namespace Klinika.DATA
                     AddressId = 29, // Niš
                     NoShowCount = 0,
                     CreatedAt = new DateTime(2025, 1, 20)
-                }
+                },
+                    new Patient
+                    {
+                        Id = 37,
+                        Email = "luka.testic@example.com",
+                        FirstName = "Luka",
+                        LastName = "Testić",
+                        PhoneNumber = "060-555-0007",
+                        JMBG = "1505201100037",
+                        Gender = "M",
+                        BloodType = "A+",
+                        DateOfBirth = new DateTime(2011, 5, 15),
+                        AddressId = 32,
+                        GuardianId = 33, // Mother Milena
+                        NoShowCount = 0,
+                        CreatedAt = new DateTime(2025, 1, 15)
+                    },
+
+                    // Toddler (2 years old)
+                    new Patient
+                    {
+                        Id = 38,
+                        FirstName = "Nikola",
+                        LastName = "Petrović",
+                        PhoneNumber = "060-555-0008",
+                        JMBG = "1008202300038",
+                        Gender = "M",
+                        BloodType = "O+",
+                        DateOfBirth = new DateTime(2023, 8, 10),
+                        AddressId = 33,
+                        GuardianId = 34, // Father Igor
+                        NoShowCount = 0,
+                        CreatedAt = new DateTime(2023, 8, 15)
+                    },
+
+                    // Baby 1 (6 months old) - Sara
+                    new Patient
+                    {
+                        Id = 39,
+                        FirstName = "Sara",
+                        LastName = "Jovanović",
+                        PhoneNumber = "060-555-0009",
+                        JMBG = "1507202500039",
+                        Gender = "F",
+                        BloodType = "A+",
+                        DateOfBirth = new DateTime(2025, 7, 15), // 6 months old
+                        AddressId = 34,
+                        GuardianId = 35, // Mother Sandra
+                        NoShowCount = 0,
+                        CreatedAt = new DateTime(2025, 7, 16)
+                    },
+
+                    // Baby 2 (9 months old) - David
+                    new Patient
+                    {
+                        Id = 40,
+                        FirstName = "David",
+                        LastName = "Nikolić",
+                        PhoneNumber = "060-555-0010",
+                        JMBG = "1004202500040",
+                        Gender = "M",
+                        BloodType = "B+",
+                        DateOfBirth = new DateTime(2025, 4, 10), // 9 months old
+                        AddressId = 35,
+                        GuardianId = 36, // Father Darko
+                        NoShowCount = 0,
+                        CreatedAt = new DateTime(2025, 4, 11)
+                    }
+
             );
 
             modelBuilder.Entity<AppointmentSlot>().HasData(
@@ -1012,6 +1266,79 @@ namespace Klinika.DATA
                 new AppointmentSlot { Id = 19, DoctorId = 13, Date = new DateOnly(2026, 2, 10), StartTime = new TimeOnly(11, 0), EndTime = new TimeOnly(11, 15), IsAvailable = true },
                 new AppointmentSlot { Id = 20, DoctorId = 13, Date = new DateOnly(2026, 2, 10), StartTime = new TimeOnly(11, 15), EndTime = new TimeOnly(11, 30), IsAvailable = true },
                 new AppointmentSlot { Id = 21, DoctorId = 13, Date = new DateOnly(2026, 2, 11), StartTime = new TimeOnly(9, 0), EndTime = new TimeOnly(9, 15), IsAvailable = true }
+            );
+
+            modelBuilder.Entity<PatientAllergen>().HasData(
+    // Patient 27 (Marko Testić) - Penicilin and Polen breze
+                new PatientAllergen
+                {
+                    PatientId = 27,
+                    AllergenId = 1,
+                    DiagnosedDate = new DateTime(2020, 3, 15),
+                    Notes = "Reakcija manifestovana osipom i crvenilom kože"
+                },
+                new PatientAllergen
+                {
+                    PatientId = 27,
+                    AllergenId = 2,
+                    DiagnosedDate = new DateTime(2018, 4, 10),
+                    Notes = "Simptomi kijanja i curenja nosa tokom proleća"
+                },
+
+                // Patient 28 (Ana Jović) - Laktoza
+                new PatientAllergen
+                {
+                    PatientId = 28,
+                    AllergenId = 3,
+                    DiagnosedDate = new DateTime(2019, 6, 20),
+                    Notes = "Izbegavati mlečne proizvode"
+                },
+
+                // Patient 29 (Petar Petrović) - Kikiriki, Jod, Aspirin
+                new PatientAllergen
+                {
+                    PatientId = 29,
+                    AllergenId = 4,
+                    DiagnosedDate = new DateTime(2015, 8, 5),
+                    Notes = "Ozbiljna reakcija, može izazvati anafilaksiju"
+                },
+                new PatientAllergen
+                {
+                    PatientId = 29,
+                    AllergenId = 5,
+                    DiagnosedDate = new DateTime(2021, 11, 12),
+                    Notes = "Izbegavati kontrastna sredstva sa jodom"
+                },
+                new PatientAllergen
+                {
+                    PatientId = 29,
+                    AllergenId = 6,
+                    DiagnosedDate = new DateTime(2022, 2, 18)
+                },
+
+                // Patient 31 (Stefan Nikolić) - Prašina and Mačja dlaka
+                new PatientAllergen
+                {
+                    PatientId = 31,
+                    AllergenId = 7,
+                    DiagnosedDate = new DateTime(2017, 9, 25),
+                    Notes = "Otežano disanje u prašnjavim prostorima"
+                },
+                new PatientAllergen
+                {
+                    PatientId = 31,
+                    AllergenId = 8,
+                    DiagnosedDate = new DateTime(2019, 5, 30),
+                    Notes = "Kijanje i suzenje očiju"
+                },
+
+                // Patient 32 (Milica Đorđević) - Sulfonamidi
+                new PatientAllergen
+                {
+                    PatientId = 32,
+                    AllergenId = 9,
+                    DiagnosedDate = new DateTime(2020, 12, 8)
+                }
             );
 
             // ===============================================================
@@ -1059,7 +1386,8 @@ namespace Klinika.DATA
                     ScheduledEndTime = new TimeOnly(10, 15),
                     BookedAt = new DateTime(2026, 2, 3, 14, 20, 0),
                     BookedByWorkerId = 20, // Secretary Jovana
-                    PreventiveNotes = "Prehlada"
+                    PreventiveNotes = "Prehlada",
+                    IsVaccination = false
                 }
             );
 
@@ -1128,8 +1456,269 @@ namespace Klinika.DATA
                     ScheduledEndTime = new TimeOnly(11, 15),
                     BookedAt = new DateTime(2026, 2, 1, 15, 45, 0),
                     BookedByWorkerId = 24, // Secretary Milena (Niš)
-                    PreventiveNotes = "Ostati u krevetu ako se pojave simptomi prehlade ili gripa."
+                    PreventiveNotes = "Ostati u krevetu ako se pojave simptomi prehlade ili gripa.",
+                    IsVaccination = false
                 }
+            );
+
+            modelBuilder.Entity<PreventiveAppointment>().HasData(
+    new
+    {
+        Id = 6,
+        AppointmentSlotId = 11,
+        PatientId = 39, // Baby Sara
+        ClinicId = 1,
+        DoctorId = 5, // Pediatrician Dr. Ana
+        AppointmentType = AppointmentType.Preventive,
+        Status = AppointmentStatus.Completed,
+        ScheduledDate = new DateOnly(2025, 10, 15),
+        ScheduledStartTime = new TimeOnly(10, 15),
+        ScheduledEndTime = new TimeOnly(10, 30),
+        BookedAt = new DateTime(2025, 10, 1, 9, 0, 0),
+        BookedByWorkerId = 20,
+        CheckedInAt = new DateTime(2025, 10, 15, 10, 10, 0),
+        CompletedAt = new DateTime(2025, 10, 15, 10, 28, 0),
+        PreventiveNotes = "Redovna kontrola razvoja deteta u 3. mesecu života.",
+        ChildDevelopmentNotes = "Beba Sara - 3 meseca: Odličan napredak. Težina: 5.8 kg, dužina: 60 cm. Drži glavicu samostalno, prati predmete očima, osmehuje se na glas roditelja. Reaguje na zvukove. Počinje da grabi igračke. Preporučeno: nastaviti dojenje, uvesti vitamin D3. Sledeći pregled za 3 meseca.",
+        IsVaccination = false
+    }
+);
+
+            // Sara's 6-month checkup (SCHEDULED - upcoming)
+            modelBuilder.Entity<PreventiveAppointment>().HasData(
+                new
+                {
+                    Id = 7,
+                    AppointmentSlotId = 13,
+                    PatientId = 39, // Baby Sara
+                    ClinicId = 1,
+                    DoctorId = 5,
+                    AppointmentType = AppointmentType.Preventive,
+                    Status = AppointmentStatus.Scheduled,
+                    ScheduledDate = new DateOnly(2026, 1, 15),
+                    ScheduledStartTime = new TimeOnly(14, 0),
+                    ScheduledEndTime = new TimeOnly(14, 15),
+                    BookedAt = new DateTime(2025, 12, 20, 11, 30, 0),
+                    BookedByWorkerId = 20,
+                    PreventiveNotes = "Šestomesečna kontrola razvoja i eventualna vakcinacija.",
+                    IsVaccination = false
+                }
+            );
+
+            // ===== BABY DEVELOPMENT TRACKING - DAVID (9 months) =====
+
+            // David's 3-month checkup (COMPLETED)
+            modelBuilder.Entity<PreventiveAppointment>().HasData(
+                new
+                {
+                    Id = 8,
+                    AppointmentSlotId = 12,
+                    PatientId = 40, // Baby David
+                    ClinicId = 1,
+                    DoctorId = 5,
+                    AppointmentType = AppointmentType.Preventive,
+                    Status = AppointmentStatus.Completed,
+                    ScheduledDate = new DateOnly(2025, 7, 10),
+                    ScheduledStartTime = new TimeOnly(10, 30),
+                    ScheduledEndTime = new TimeOnly(10, 45),
+                    BookedAt = new DateTime(2025, 6, 25, 14, 0, 0),
+                    BookedByWorkerId = 20,
+                    CheckedInAt = new DateTime(2025, 7, 10, 10, 25, 0),
+                    CompletedAt = new DateTime(2025, 7, 10, 10, 43, 0),
+                    PreventiveNotes = "Kontrola razvoja u 3. mesecu.",
+                    ChildDevelopmentNotes = "Beba David - 3 meseca: Normalan razvoj. Težina: 6.2 kg, dužina: 62 cm. Dobro drži glavu, aktivno pomera ruke i noge. Pravi glasove (gugutanje). Prepoznaje roditelje. Spava 4-5 sati noću. Preporučeno: nastaviti dojenje ili adaptirano mleko, vitamin D3.",
+                    IsVaccination = false
+                }
+            );
+
+            // David's 6-month checkup (COMPLETED)
+            modelBuilder.Entity<PreventiveAppointment>().HasData(
+                new
+                {
+                    Id = 9,
+                    AppointmentSlotId = 14,
+                    PatientId = 40, // Baby David
+                    ClinicId = 1,
+                    DoctorId = 5,
+                    AppointmentType = AppointmentType.Preventive,
+                    Status = AppointmentStatus.Completed,
+                    ScheduledDate = new DateOnly(2025, 10, 10),
+                    ScheduledStartTime = new TimeOnly(14, 15),
+                    ScheduledEndTime = new TimeOnly(14, 30),
+                    BookedAt = new DateTime(2025, 9, 25, 10, 15, 0),
+                    BookedByWorkerId = 20,
+                    CheckedInAt = new DateTime(2025, 10, 10, 14, 10, 0),
+                    CompletedAt = new DateTime(2025, 10, 10, 14, 27, 0),
+                    PreventiveNotes = "Šestomesečna kontrola.",
+                    ChildDevelopmentNotes = "Beba David - 6 meseci: Odličan napredak. Težina: 8.1 kg, dužina: 68 cm. Sedi uz potporu, okreće se sa stomaka na leđa i obrnuto. Hvata igračke objema rukama, prebacuje iz ruke u ruku. Brblja (ma-ma, ba-ba). Počinje zanimanje za čvrstu hranu. Preporučeno: uvesti kašice (povrće, voće), nastaviti dojenje.",
+                    IsVaccination = false
+                }
+            );
+
+            // David's 9-month checkup (SCHEDULED - upcoming)
+            modelBuilder.Entity<PreventiveAppointment>().HasData(
+                new
+                {
+                    Id = 10,
+                    AppointmentSlotId = 2,
+                    PatientId = 40, // Baby David
+                    ClinicId = 1,
+                    DoctorId = 5,
+                    AppointmentType = AppointmentType.Preventive,
+                    Status = AppointmentStatus.Scheduled,
+                    ScheduledDate = new DateOnly(2026, 1, 10),
+                    ScheduledStartTime = new TimeOnly(9, 15),
+                    ScheduledEndTime = new TimeOnly(9, 30),
+                    BookedAt = new DateTime(2025, 12, 15, 13, 45, 0),
+                    BookedByWorkerId = 20,
+                    PreventiveNotes = "Devetomesečna kontrola razvoja.",
+                    IsVaccination = false
+                }
+            );
+
+            // Seed Vaccination Records
+            modelBuilder.Entity<VaccinationRecord>().HasData(
+                // Patient 27 (Marko Testić) - COVID-19 and Tetanus
+                new VaccinationRecord
+                {
+                    Id = 1,
+                    PatientId = 27,
+                    VaccinationId = 1, // COVID-19
+                    AdministeredDate = new DateTime(2024, 10, 15, 14, 30, 0),
+                    AdministeredByDoctorId = 4,
+                    Notes = "Prva doza COVID-19 vakcine. Pacijent dobro podnosi, bez neželjenih reakcija."
+                },
+                new VaccinationRecord
+                {
+                    Id = 2,
+                    PatientId = 27,
+                    VaccinationId = 5, // Tetanus
+                    AdministeredDate = new DateTime(2023, 3, 20, 10, 15, 0),
+                    AdministeredByDoctorId = 4,
+                    Notes = "Revakcinacija protiv tetanusa nakon male povrede."
+                },
+
+                // Patient 28 (Ana Jović) - Grip (Flu)
+                new VaccinationRecord
+                {
+                    Id = 3,
+                    PatientId = 28,
+                    VaccinationId = 2, // Grip
+                    AdministeredDate = new DateTime(2024, 11, 5, 9, 0, 0),
+                    AdministeredByDoctorId = 5,
+                    Notes = "Sezonska vakcina protiv gripa 2024/2025."
+                },
+
+                // Patient 29 (Petar Petrović) - COVID-19, Hepatitis B
+                new VaccinationRecord
+                {
+                    Id = 4,
+                    PatientId = 29,
+                    VaccinationId = 1, // COVID-19
+                    AdministeredDate = new DateTime(2024, 9, 12, 11, 30, 0),
+                    AdministeredByDoctorId = 9,
+                    Notes = "Booster doza COVID-19 vakcine."
+                },
+                new VaccinationRecord
+                {
+                    Id = 5,
+                    PatientId = 29,
+                    VaccinationId = 3, // Hepatitis B
+                    AdministeredDate = new DateTime(2022, 5, 18, 14, 0, 0),
+                    AdministeredByDoctorId = 9,
+                    Notes = "Hepatitis B vakcina - treća doza."
+                },
+
+                // Patient 30 (Jovana Milić) - HPV
+                new VaccinationRecord
+                {
+                    Id = 6,
+                    PatientId = 30,
+                    VaccinationId = 6, // HPV
+                    AdministeredDate = new DateTime(2023, 7, 22, 15, 45, 0),
+                    AdministeredByDoctorId = 13,
+                    Notes = "Prva doza HPV vakcine."
+                },
+
+                // Patient 31 (Stefan Nikolić) - Grip, Tetanus
+                new VaccinationRecord
+                {
+                    Id = 7,
+                    PatientId = 31,
+                    VaccinationId = 2, // Grip
+                    AdministeredDate = new DateTime(2024, 10, 28, 10, 0, 0),
+                    AdministeredByDoctorId = 13,
+                    Notes = "Sezonska vakcina protiv gripa."
+                },
+                new VaccinationRecord
+                {
+                    Id = 8,
+                    PatientId = 31,
+                    VaccinationId = 5, // Tetanus
+                    AdministeredDate = new DateTime(2021, 8, 10, 13, 20, 0),
+                    AdministeredByDoctorId = 13,
+                    Notes = "Standardna revakcinacija protiv tetanusa."
+                },
+
+                // Patient 32 (Milica Đorđević) - MMR, COVID-19
+                new VaccinationRecord
+                {
+                    Id = 9,
+                    PatientId = 32,
+                    VaccinationId = 4, // MMR
+                    AdministeredDate = new DateTime(2020, 1, 15, 9, 30, 0),
+                    AdministeredByDoctorId = 13,
+                    Notes = "MMR vakcina - revakcinacija."
+                },
+                new VaccinationRecord
+                {
+                    Id = 10,
+                    PatientId = 32,
+                    VaccinationId = 1, // COVID-19
+                    AdministeredDate = new DateTime(2024, 12, 3, 16, 0, 0),
+                    AdministeredByDoctorId = 13,
+                    Notes = "COVID-19 vakcina - booster doza za zimu 2024/2025."
+                },
+                // Baby Sara vaccinations
+                new VaccinationRecord
+                {
+                    Id = 11,
+                    PatientId = 39, // Baby Sara
+                    VaccinationId = 8, // BCG
+                    AdministeredDate = new DateTime(2025, 7, 16, 10, 0, 0),
+                    AdministeredByDoctorId = 5,
+                    Notes = "BCG vakcina pri rođenju. Beba dobro podnela."
+                },
+                new VaccinationRecord
+                {
+                    Id = 12,
+                    PatientId = 39,
+                    VaccinationId = 3, // Hepatitis B
+                    AdministeredDate = new DateTime(2025, 7, 16, 10, 5, 0),
+                    AdministeredByDoctorId = 5,
+                    Notes = "Hepatitis B - prva doza odmah nakon rođenja."
+                },
+
+                // Baby David vaccinations
+                new VaccinationRecord
+                {
+                    Id = 13,
+                    PatientId = 40, // Baby David
+                    VaccinationId = 8, // BCG
+                    AdministeredDate = new DateTime(2025, 4, 11, 9, 30, 0),
+                    AdministeredByDoctorId = 5,
+                    Notes = "BCG vakcina pri rođenju."
+                },
+                new VaccinationRecord
+                {
+                    Id = 14,
+                    PatientId = 40,
+                    VaccinationId = 3, // Hepatitis B
+                    AdministeredDate = new DateTime(2025, 4, 11, 9, 35, 0),
+                    AdministeredByDoctorId = 5,
+                    Notes = "Hepatitis B - prva doza."
+                }
+
             );
         }
     }

@@ -2,6 +2,6 @@
 {
     public class Guardian : Person
     {
-        public List<Patient>? Children { get; set; }
+        public ICollection<Patient> Children { get; set; } = new List<Patient>();
     }
 }

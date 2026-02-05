@@ -8,11 +8,25 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Klinika.Migrations
 {
     /// <inheritdoc />
-    public partial class AddAppointmentSystemWithInheritance : Migration
+    public partial class InitialWithBabiesFinalHope : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Allergens",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Allergens", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Cities",
                 columns: table => new
@@ -26,6 +40,20 @@ namespace Klinika.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Cities", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Vaccinations",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Vaccinations", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -81,7 +109,7 @@ namespace Klinika.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Email = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     FirstName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -116,7 +144,7 @@ namespace Klinika.Migrations
                         column: x => x.Id,
                         principalTable: "Persons",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -142,7 +170,7 @@ namespace Klinika.Migrations
                         column: x => x.Id,
                         principalTable: "Persons",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -161,13 +189,14 @@ namespace Klinika.Migrations
                         name: "FK_Patients_Guardians_GuardianId",
                         column: x => x.GuardianId,
                         principalTable: "Guardians",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "FK_Patients_Persons_Id",
                         column: x => x.Id,
                         principalTable: "Persons",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -226,6 +255,32 @@ namespace Klinika.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "PatientAllergens",
+                columns: table => new
+                {
+                    PatientId = table.Column<int>(type: "int", nullable: false),
+                    AllergenId = table.Column<int>(type: "int", nullable: false),
+                    DiagnosedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Notes = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PatientAllergens", x => new { x.PatientId, x.AllergenId });
+                    table.ForeignKey(
+                        name: "FK_PatientAllergens_Allergens_AllergenId",
+                        column: x => x.AllergenId,
+                        principalTable: "Allergens",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_PatientAllergens_Patients_PatientId",
+                        column: x => x.PatientId,
+                        principalTable: "Patients",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AppointmentSlots",
                 columns: table => new
                 {
@@ -270,6 +325,9 @@ namespace Klinika.Migrations
                     CancelledAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CancellationReason = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     PreventiveNotes = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
+                    ChildDevelopmentNotes = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
+                    IsVaccination = table.Column<bool>(type: "bit", nullable: true),
+                    VaccinationId = table.Column<int>(type: "int", nullable: true),
                     Anamnesis = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
                     StatusObservation = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
                     Therapy = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
@@ -303,11 +361,75 @@ namespace Klinika.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
+                        name: "FK_Appointments_Vaccinations_VaccinationId",
+                        column: x => x.VaccinationId,
+                        principalTable: "Vaccinations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
                         name: "FK_Appointments_Workers_BookedByWorkerId",
                         column: x => x.BookedByWorkerId,
                         principalTable: "Workers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "VaccinationRecords",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PatientId = table.Column<int>(type: "int", nullable: false),
+                    VaccinationId = table.Column<int>(type: "int", nullable: false),
+                    AdministeredDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Notes = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    AdministeredByDoctorId = table.Column<int>(type: "int", nullable: false),
+                    PreventiveAppointmentId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_VaccinationRecords", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_VaccinationRecords_Appointments_PreventiveAppointmentId",
+                        column: x => x.PreventiveAppointmentId,
+                        principalTable: "Appointments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_VaccinationRecords_Doctors_AdministeredByDoctorId",
+                        column: x => x.AdministeredByDoctorId,
+                        principalTable: "Doctors",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_VaccinationRecords_Patients_PatientId",
+                        column: x => x.PatientId,
+                        principalTable: "Patients",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_VaccinationRecords_Vaccinations_VaccinationId",
+                        column: x => x.VaccinationId,
+                        principalTable: "Vaccinations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.InsertData(
+                table: "Allergens",
+                columns: new[] { "Id", "Description", "Name" },
+                values: new object[,]
+                {
+                    { 1, "Alergija na penicilin i srodne antibiotike", "Penicilin" },
+                    { 2, "Sezonska alergija na polen breze", "Polen breze" },
+                    { 3, "Intolerancija na laktozu", "Laktoza" },
+                    { 4, "Alergija na kikiriki i proizvode sa kirikikijem", "Kikiriki" },
+                    { 5, "Alergija na jod i kontrastna sredstva", "Jod" },
+                    { 6, "Alergija na aspirin i NSAIL lekove", "Aspirin" },
+                    { 7, "Alergija na kućnu prašinu i grinje", "Prašina" },
+                    { 8, "Alergija na mačju dlaku", "Mačja dlaka" },
+                    { 9, "Alergija na sulfonamidne antibiotike", "Sulfonamidi" }
                 });
 
             migrationBuilder.InsertData(
@@ -418,6 +540,21 @@ namespace Klinika.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "Vaccinations",
+                columns: new[] { "Id", "Description", "Name" },
+                values: new object[,]
+                {
+                    { 1, "Vakcina protiv COVID-19", "COVID-19" },
+                    { 2, "Sezonska vakcina protiv gripa", "Grip" },
+                    { 3, "Vakcina protiv hepatitisa B", "Hepatitis B" },
+                    { 4, "Vakcina protiv malih boginja, mumpsa i rubele", "MMR" },
+                    { 5, "Vakcina protiv tetanusa", "Tetanus" },
+                    { 6, "Vakcina protiv humanog papiloma virusa", "HPV" },
+                    { 7, "Vakcina protiv pneumokoka", "Pneumokokna" },
+                    { 8, "Vakcina protiv tuberkuloze", "BCG" }
+                });
+
+            migrationBuilder.InsertData(
                 table: "Addresses",
                 columns: new[] { "Id", "AdditionalInfo", "ApartmentNumber", "CityId", "StreetName", "StreetNumber" },
                 values: new object[,]
@@ -452,7 +589,11 @@ namespace Klinika.Migrations
                     { 28, null, null, 2, "Laze Nančića", "16" },
                     { 29, null, null, 3, "Vožda Karađorđa", "23" },
                     { 30, null, null, 4, "Radničke brigade", "31" },
-                    { 31, null, null, 5, "Đure Cvejića", "8" }
+                    { 31, null, null, 5, "Đure Cvejića", "8" },
+                    { 32, null, null, 1, "Cara Lazara", "55" },
+                    { 33, null, null, 1, "Branislava Nušića", "12" },
+                    { 34, null, null, 2, "Svetog Save", "8" },
+                    { 35, null, null, 3, "Vojvode Stepe", "23" }
                 });
 
             migrationBuilder.InsertData(
@@ -503,7 +644,26 @@ namespace Klinika.Migrations
                     { 29, 27, new DateTime(2025, 1, 20, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1998, 3, 20, 0, 0, 0, 0, DateTimeKind.Unspecified), "petar.petrovic@example.com", "Petar", "M", "2003998700029", "Petrović", "060-555-0003" },
                     { 30, 28, new DateTime(2025, 1, 20, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1993, 6, 12, 0, 0, 0, 0, DateTimeKind.Unspecified), "jovana.milic@example.com", "Jovana", "F", "1206993700030", "Milić", "060-555-0004" },
                     { 31, 29, new DateTime(2025, 1, 20, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1996, 9, 5, 0, 0, 0, 0, DateTimeKind.Unspecified), "stefan.nikolic@example.com", "Stefan", "M", "0509996700031", "Nikolić", "060-555-0005" },
-                    { 32, 29, new DateTime(2025, 1, 20, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1994, 1, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "milica.djordjevic@example.com", "Milica", "F", "2801994700032", "Đorđević", "060-555-0006" }
+                    { 32, 29, new DateTime(2025, 1, 20, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1994, 1, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "milica.djordjevic@example.com", "Milica", "F", "2801994700032", "Đorđević", "060-555-0006" },
+                    { 33, 32, new DateTime(2025, 1, 10, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1985, 8, 15, 0, 0, 0, 0, DateTimeKind.Unspecified), "milena.testic@example.com", "Milena", "F", "1508985700033", "Testić", "060-888-0001" },
+                    { 34, 33, new DateTime(2025, 1, 11, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1983, 3, 22, 0, 0, 0, 0, DateTimeKind.Unspecified), "igor.petrovic@example.com", "Igor", "M", "2203983700034", "Petrović", "060-888-0002" },
+                    { 35, 34, new DateTime(2025, 1, 12, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1990, 12, 8, 0, 0, 0, 0, DateTimeKind.Unspecified), "sandra.jovanovic@example.com", "Sandra", "F", "0812990700035", "Jovanović", "060-888-0003" },
+                    { 36, 35, new DateTime(2025, 1, 13, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1988, 5, 15, 0, 0, 0, 0, DateTimeKind.Unspecified), "darko.nikolic@example.com", "Darko", "M", "1505988700036", "Nikolić", "060-888-0004" },
+                    { 37, 32, new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(2011, 5, 15, 0, 0, 0, 0, DateTimeKind.Unspecified), "luka.testic@example.com", "Luka", "M", "1505201100037", "Testić", "060-555-0007" },
+                    { 38, 33, new DateTime(2023, 8, 15, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(2023, 8, 10, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Nikola", "M", "1008202300038", "Petrović", "060-555-0008" },
+                    { 39, 34, new DateTime(2025, 7, 16, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(2025, 7, 15, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "Sara", "F", "1507202500039", "Jovanović", "060-555-0009" },
+                    { 40, 35, new DateTime(2025, 4, 11, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(2025, 4, 10, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "David", "M", "1004202500040", "Nikolić", "060-555-0010" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Guardians",
+                column: "Id",
+                values: new object[]
+                {
+                    33,
+                    34,
+                    35,
+                    36
                 });
 
             migrationBuilder.InsertData(
@@ -586,6 +746,33 @@ namespace Klinika.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "PatientAllergens",
+                columns: new[] { "AllergenId", "PatientId", "DiagnosedDate", "Notes" },
+                values: new object[,]
+                {
+                    { 1, 27, new DateTime(2020, 3, 15, 0, 0, 0, 0, DateTimeKind.Unspecified), "Reakcija manifestovana osipom i crvenilom kože" },
+                    { 2, 27, new DateTime(2018, 4, 10, 0, 0, 0, 0, DateTimeKind.Unspecified), "Simptomi kijanja i curenja nosa tokom proleća" },
+                    { 3, 28, new DateTime(2019, 6, 20, 0, 0, 0, 0, DateTimeKind.Unspecified), "Izbegavati mlečne proizvode" },
+                    { 4, 29, new DateTime(2015, 8, 5, 0, 0, 0, 0, DateTimeKind.Unspecified), "Ozbiljna reakcija, može izazvati anafilaksiju" },
+                    { 5, 29, new DateTime(2021, 11, 12, 0, 0, 0, 0, DateTimeKind.Unspecified), "Izbegavati kontrastna sredstva sa jodom" },
+                    { 6, 29, new DateTime(2022, 2, 18, 0, 0, 0, 0, DateTimeKind.Unspecified), null },
+                    { 7, 31, new DateTime(2017, 9, 25, 0, 0, 0, 0, DateTimeKind.Unspecified), "Otežano disanje u prašnjavim prostorima" },
+                    { 8, 31, new DateTime(2019, 5, 30, 0, 0, 0, 0, DateTimeKind.Unspecified), "Kijanje i suzenje očiju" },
+                    { 9, 32, new DateTime(2020, 12, 8, 0, 0, 0, 0, DateTimeKind.Unspecified), null }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Patients",
+                columns: new[] { "Id", "BloodType", "GuardianId", "NoShowCount" },
+                values: new object[,]
+                {
+                    { 37, "A+", 33, 0 },
+                    { 38, "O+", 34, 0 },
+                    { 39, "A+", 35, 0 },
+                    { 40, "B+", 36, 0 }
+                });
+
+            migrationBuilder.InsertData(
                 table: "Secretaries",
                 columns: new[] { "Id", "Qualification" },
                 values: new object[,]
@@ -628,14 +815,35 @@ namespace Klinika.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "VaccinationRecords",
+                columns: new[] { "Id", "AdministeredByDoctorId", "AdministeredDate", "Notes", "PatientId", "PreventiveAppointmentId", "VaccinationId" },
+                values: new object[,]
+                {
+                    { 1, 4, new DateTime(2024, 10, 15, 14, 30, 0, 0, DateTimeKind.Unspecified), "Prva doza COVID-19 vakcine. Pacijent dobro podnosi, bez neželjenih reakcija.", 27, null, 1 },
+                    { 2, 4, new DateTime(2023, 3, 20, 10, 15, 0, 0, DateTimeKind.Unspecified), "Revakcinacija protiv tetanusa nakon male povrede.", 27, null, 5 },
+                    { 3, 5, new DateTime(2024, 11, 5, 9, 0, 0, 0, DateTimeKind.Unspecified), "Sezonska vakcina protiv gripa 2024/2025.", 28, null, 2 },
+                    { 4, 9, new DateTime(2024, 9, 12, 11, 30, 0, 0, DateTimeKind.Unspecified), "Booster doza COVID-19 vakcine.", 29, null, 1 },
+                    { 5, 9, new DateTime(2022, 5, 18, 14, 0, 0, 0, DateTimeKind.Unspecified), "Hepatitis B vakcina - treća doza.", 29, null, 3 },
+                    { 6, 13, new DateTime(2023, 7, 22, 15, 45, 0, 0, DateTimeKind.Unspecified), "Prva doza HPV vakcine.", 30, null, 6 },
+                    { 7, 13, new DateTime(2024, 10, 28, 10, 0, 0, 0, DateTimeKind.Unspecified), "Sezonska vakcina protiv gripa.", 31, null, 2 },
+                    { 8, 13, new DateTime(2021, 8, 10, 13, 20, 0, 0, DateTimeKind.Unspecified), "Standardna revakcinacija protiv tetanusa.", 31, null, 5 },
+                    { 9, 13, new DateTime(2020, 1, 15, 9, 30, 0, 0, DateTimeKind.Unspecified), "MMR vakcina - revakcinacija.", 32, null, 4 },
+                    { 10, 13, new DateTime(2024, 12, 3, 16, 0, 0, 0, DateTimeKind.Unspecified), "COVID-19 vakcina - booster doza za zimu 2024/2025.", 32, null, 1 },
+                    { 11, 5, new DateTime(2025, 7, 16, 10, 0, 0, 0, DateTimeKind.Unspecified), "BCG vakcina pri rođenju. Beba dobro podnela.", 39, null, 8 },
+                    { 12, 5, new DateTime(2025, 7, 16, 10, 5, 0, 0, DateTimeKind.Unspecified), "Hepatitis B - prva doza odmah nakon rođenja.", 39, null, 3 },
+                    { 13, 5, new DateTime(2025, 4, 11, 9, 30, 0, 0, DateTimeKind.Unspecified), "BCG vakcina pri rođenju.", 40, null, 8 },
+                    { 14, 5, new DateTime(2025, 4, 11, 9, 35, 0, 0, DateTimeKind.Unspecified), "Hepatitis B - prva doza.", 40, null, 3 }
+                });
+
+            migrationBuilder.InsertData(
                 table: "Appointments",
                 columns: new[] { "Id", "Anamnesis", "AppointmentSlotId", "AppointmentType", "BookedAt", "BookedByWorkerId", "CancellationReason", "CancelledAt", "CheckedInAt", "ClinicId", "CompletedAt", "DiagnosedCondition", "DoctorId", "PatientId", "ScheduledDate", "ScheduledEndTime", "ScheduledStartTime", "Status", "StatusObservation", "Therapy" },
                 values: new object[] { 1, "Pacijent se žali na bol u grudima koji traje 2 dana, kratkoća daha tokom fizičke aktivnosti, povremeno vrtoglavica. Nema porodičnu istoriju srčanih oboljenja. Puši 10 cigareta dnevno poslednjih 5 godina.", 1, 1, new DateTime(2026, 2, 1, 10, 30, 0, 0, DateTimeKind.Unspecified), 20, null, null, new DateTime(2026, 2, 10, 8, 55, 0, 0, DateTimeKind.Unspecified), 1, new DateTime(2026, 2, 10, 9, 12, 0, 0, DateTimeKind.Unspecified), "Blaga hipertenzija sa sumnjom na anginu pektoris", 4, 27, new DateOnly(2026, 2, 10), new TimeOnly(9, 15, 0), new TimeOnly(9, 0, 0), 2, "Krvni pritisak: 145/95 mmHg (povišen), Puls: 88 otkucaja/min (blago ubrzan), Pacijent izgleda blago zabrinuto, osluškivanje srca pokazuje pravilne tonove bez šumova. EKG: blage promene u ST segmentu.", "Propisano: Aspirin 100mg jednom dnevno, ACE inhibitor (Enalapril 5mg). Preporučeno: EKG test pod opterećenjem, smanjiti unos soli, umerena fizička aktivnost (šetnja 30min dnevno), prestanak pušenja. Kontrolni pregled za 2 nedelje." });
 
             migrationBuilder.InsertData(
                 table: "Appointments",
-                columns: new[] { "Id", "AppointmentSlotId", "AppointmentType", "BookedAt", "BookedByWorkerId", "CancellationReason", "CancelledAt", "CheckedInAt", "ClinicId", "CompletedAt", "DoctorId", "PatientId", "PreventiveNotes", "ScheduledDate", "ScheduledEndTime", "ScheduledStartTime", "Status" },
-                values: new object[] { 2, 10, 0, new DateTime(2026, 2, 3, 14, 20, 0, 0, DateTimeKind.Unspecified), 20, null, null, null, 1, null, 5, 28, "Prehlada", new DateOnly(2026, 2, 10), new TimeOnly(10, 15, 0), new TimeOnly(10, 0, 0), 0 });
+                columns: new[] { "Id", "AppointmentSlotId", "AppointmentType", "BookedAt", "BookedByWorkerId", "CancellationReason", "CancelledAt", "CheckedInAt", "ChildDevelopmentNotes", "ClinicId", "CompletedAt", "DoctorId", "IsVaccination", "PatientId", "PreventiveNotes", "ScheduledDate", "ScheduledEndTime", "ScheduledStartTime", "Status", "VaccinationId" },
+                values: new object[] { 2, 10, 0, new DateTime(2026, 2, 3, 14, 20, 0, 0, DateTimeKind.Unspecified), 20, null, null, null, null, 1, null, 5, false, 28, "Prehlada", new DateOnly(2026, 2, 10), new TimeOnly(10, 15, 0), new TimeOnly(10, 0, 0), 0, null });
 
             migrationBuilder.InsertData(
                 table: "Appointments",
@@ -648,13 +856,27 @@ namespace Klinika.Migrations
 
             migrationBuilder.InsertData(
                 table: "Appointments",
-                columns: new[] { "Id", "AppointmentSlotId", "AppointmentType", "BookedAt", "BookedByWorkerId", "CancellationReason", "CancelledAt", "CheckedInAt", "ClinicId", "CompletedAt", "DoctorId", "PatientId", "PreventiveNotes", "ScheduledDate", "ScheduledEndTime", "ScheduledStartTime", "Status" },
-                values: new object[] { 5, 19, 0, new DateTime(2026, 2, 1, 15, 45, 0, 0, DateTimeKind.Unspecified), 24, null, null, null, 3, null, 13, 31, "Ostati u krevetu ako se pojave simptomi prehlade ili gripa.", new DateOnly(2026, 2, 10), new TimeOnly(11, 15, 0), new TimeOnly(11, 0, 0), 4 });
+                columns: new[] { "Id", "AppointmentSlotId", "AppointmentType", "BookedAt", "BookedByWorkerId", "CancellationReason", "CancelledAt", "CheckedInAt", "ChildDevelopmentNotes", "ClinicId", "CompletedAt", "DoctorId", "IsVaccination", "PatientId", "PreventiveNotes", "ScheduledDate", "ScheduledEndTime", "ScheduledStartTime", "Status", "VaccinationId" },
+                values: new object[,]
+                {
+                    { 5, 19, 0, new DateTime(2026, 2, 1, 15, 45, 0, 0, DateTimeKind.Unspecified), 24, null, null, null, null, 3, null, 13, false, 31, "Ostati u krevetu ako se pojave simptomi prehlade ili gripa.", new DateOnly(2026, 2, 10), new TimeOnly(11, 15, 0), new TimeOnly(11, 0, 0), 4, null },
+                    { 6, 11, 0, new DateTime(2025, 10, 1, 9, 0, 0, 0, DateTimeKind.Unspecified), 20, null, null, new DateTime(2025, 10, 15, 10, 10, 0, 0, DateTimeKind.Unspecified), "Beba Sara - 3 meseca: Odličan napredak. Težina: 5.8 kg, dužina: 60 cm. Drži glavicu samostalno, prati predmete očima, osmehuje se na glas roditelja. Reaguje na zvukove. Počinje da grabi igračke. Preporučeno: nastaviti dojenje, uvesti vitamin D3. Sledeći pregled za 3 meseca.", 1, new DateTime(2025, 10, 15, 10, 28, 0, 0, DateTimeKind.Unspecified), 5, false, 39, "Redovna kontrola razvoja deteta u 3. mesecu života.", new DateOnly(2025, 10, 15), new TimeOnly(10, 30, 0), new TimeOnly(10, 15, 0), 2, null },
+                    { 7, 13, 0, new DateTime(2025, 12, 20, 11, 30, 0, 0, DateTimeKind.Unspecified), 20, null, null, null, null, 1, null, 5, false, 39, "Šestomesečna kontrola razvoja i eventualna vakcinacija.", new DateOnly(2026, 1, 15), new TimeOnly(14, 15, 0), new TimeOnly(14, 0, 0), 0, null },
+                    { 8, 12, 0, new DateTime(2025, 6, 25, 14, 0, 0, 0, DateTimeKind.Unspecified), 20, null, null, new DateTime(2025, 7, 10, 10, 25, 0, 0, DateTimeKind.Unspecified), "Beba David - 3 meseca: Normalan razvoj. Težina: 6.2 kg, dužina: 62 cm. Dobro drži glavu, aktivno pomera ruke i noge. Pravi glasove (gugutanje). Prepoznaje roditelje. Spava 4-5 sati noću. Preporučeno: nastaviti dojenje ili adaptirano mleko, vitamin D3.", 1, new DateTime(2025, 7, 10, 10, 43, 0, 0, DateTimeKind.Unspecified), 5, false, 40, "Kontrola razvoja u 3. mesecu.", new DateOnly(2025, 7, 10), new TimeOnly(10, 45, 0), new TimeOnly(10, 30, 0), 2, null },
+                    { 9, 14, 0, new DateTime(2025, 9, 25, 10, 15, 0, 0, DateTimeKind.Unspecified), 20, null, null, new DateTime(2025, 10, 10, 14, 10, 0, 0, DateTimeKind.Unspecified), "Beba David - 6 meseci: Odličan napredak. Težina: 8.1 kg, dužina: 68 cm. Sedi uz potporu, okreće se sa stomaka na leđa i obrnuto. Hvata igračke objema rukama, prebacuje iz ruke u ruku. Brblja (ma-ma, ba-ba). Počinje zanimanje za čvrstu hranu. Preporučeno: uvesti kašice (povrće, voće), nastaviti dojenje.", 1, new DateTime(2025, 10, 10, 14, 27, 0, 0, DateTimeKind.Unspecified), 5, false, 40, "Šestomesečna kontrola.", new DateOnly(2025, 10, 10), new TimeOnly(14, 30, 0), new TimeOnly(14, 15, 0), 2, null },
+                    { 10, 2, 0, new DateTime(2025, 12, 15, 13, 45, 0, 0, DateTimeKind.Unspecified), 20, null, null, null, null, 1, null, 5, false, 40, "Devetomesečna kontrola razvoja.", new DateOnly(2026, 1, 10), new TimeOnly(9, 30, 0), new TimeOnly(9, 15, 0), 0, null }
+                });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Addresses_CityId",
                 table: "Addresses",
                 column: "CityId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Allergens_Name",
+                table: "Allergens",
+                column: "Name",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Appointments_AppointmentSlotId",
@@ -693,6 +915,11 @@ namespace Klinika.Migrations
                 column: "ScheduledDate");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Appointments_VaccinationId",
+                table: "Appointments",
+                column: "VaccinationId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_AppointmentSlots_DoctorId_Date_StartTime",
                 table: "AppointmentSlots",
                 columns: new[] { "DoctorId", "Date", "StartTime" },
@@ -716,6 +943,11 @@ namespace Klinika.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_PatientAllergens_AllergenId",
+                table: "PatientAllergens",
+                column: "AllergenId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Patients_GuardianId",
                 table: "Patients",
                 column: "GuardianId");
@@ -729,6 +961,35 @@ namespace Klinika.Migrations
                 name: "IX_Persons_Email",
                 table: "Persons",
                 column: "Email",
+                unique: true,
+                filter: "[Email] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_VaccinationRecords_AdministeredByDoctorId",
+                table: "VaccinationRecords",
+                column: "AdministeredByDoctorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_VaccinationRecords_PatientId",
+                table: "VaccinationRecords",
+                column: "PatientId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_VaccinationRecords_PreventiveAppointmentId",
+                table: "VaccinationRecords",
+                column: "PreventiveAppointmentId",
+                unique: true,
+                filter: "[PreventiveAppointmentId] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_VaccinationRecords_VaccinationId",
+                table: "VaccinationRecords",
+                column: "VaccinationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Vaccinations_Name",
+                table: "Vaccinations",
+                column: "Name",
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -744,16 +1005,28 @@ namespace Klinika.Migrations
                 name: "Administrators");
 
             migrationBuilder.DropTable(
-                name: "Appointments");
+                name: "PatientAllergens");
 
             migrationBuilder.DropTable(
                 name: "Secretaries");
+
+            migrationBuilder.DropTable(
+                name: "VaccinationRecords");
+
+            migrationBuilder.DropTable(
+                name: "Allergens");
+
+            migrationBuilder.DropTable(
+                name: "Appointments");
 
             migrationBuilder.DropTable(
                 name: "AppointmentSlots");
 
             migrationBuilder.DropTable(
                 name: "Patients");
+
+            migrationBuilder.DropTable(
+                name: "Vaccinations");
 
             migrationBuilder.DropTable(
                 name: "Doctors");
