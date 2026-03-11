@@ -14,14 +14,27 @@ namespace Klinika.Repositories
             _context = context;
         }
 
+        public async Task<List<Worker>> GetAllAsync()
+        {
+            return await _context.Workers
+                .Include(worker => worker.Clinic)
+                .OrderBy(worker => worker.LastName)
+                .ThenBy(worker => worker.FirstName)
+                .ToListAsync();
+        }
+
         public async Task<Worker> GetByIdAsync(int id)
         {
-            return await _context.Workers.FindAsync(id);
+            return await _context.Workers
+                .Include(worker => worker.Clinic)
+                .FirstOrDefaultAsync(worker => worker.Id == id);
         }
 
         public async Task<Worker> GetByEmailAsync(string email)
         {
-            return await _context.Workers.FirstOrDefaultAsync(w => w.Email == email);
+            return await _context.Workers
+                .Include(worker => worker.Clinic)
+                .FirstOrDefaultAsync(worker => worker.Email == email);
         }
 
         public async Task<Administrator> CreateAdministratorAsync(Administrator admin)
@@ -44,8 +57,6 @@ namespace Klinika.Repositories
             await _context.SaveChangesAsync();
             return secretary;
         }
-
-
 
         public async Task<Worker> UpdateAsync(Worker worker)
         {

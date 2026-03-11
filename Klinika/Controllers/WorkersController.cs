@@ -19,24 +19,30 @@ namespace Klinika.Controllers
             _workerService = workerService;
         }
 
+        [HttpGet]
+        [Authorize(Roles = "Administrator")]
+        public async Task<ActionResult<IEnumerable<WorkerDto>>> GetAllWorkers()
+        {
+            var workers = await _workerService.GetAllAsync();
+            return Ok(workers.Select(MapWorkerDto));
+        }
+
         [HttpGet("me")]
         public async Task<IActionResult> GetCurrentWorker()
         {
-            var workerId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-            var worker = await _workerService.GetByIdAsync(workerId);
+            var workerIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            return Ok(new
+            if (!int.TryParse(workerIdValue, out var workerId))
             {
-                worker.Id,
-                worker.Email,
-                worker.FirstName,
-                worker.LastName,
-                Role = GetRoleName(worker) // Derive role from type
-            });
+                return Unauthorized(new { message = "Worker identifier is missing from the token." });
+            }
+
+            var worker = await _workerService.GetByIdAsync(workerId);
+            return Ok(MapWorkerDto(worker));
         }
 
         [HttpPost]
-        [Authorize(Roles = "Administrator")] // Only admins can create staff accounts
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> CreateWorker([FromBody] CreateWorkerRequest request)
         {
             try
@@ -61,16 +67,30 @@ namespace Klinika.Controllers
             try
             {
                 var worker = await _workerService.GetByIdAsync(id);
-                return Ok(new
-                {
-                    worker.Id,
-                    worker.Email,
-                    worker.FirstName,
-                    worker.LastName,
-                    worker.PhoneNumber,
-                    Role = GetRoleName(worker),
-                    worker.IsActive
-                });
+                return Ok(MapWorkerDto(worker));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+        }
+
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> UpdateWorker(int id, [FromBody] UpdateWorkerRequest request)
+        {
+            try
+            {
+                var worker = await _workerService.UpdateAsync(id, request);
+                return Ok(MapWorkerDto(worker));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
             }
             catch (KeyNotFoundException)
             {
@@ -86,13 +106,52 @@ namespace Klinika.Controllers
             {
                 var worker = await _workerService.GetByIdAsync(id);
                 worker.ClinicId = request.ClinicId;
-                // Update worker logic here
                 return Ok(new { Message = "Worker assigned to clinic successfully" });
             }
             catch (KeyNotFoundException ex)
             {
                 return NotFound(ex.Message);
             }
+        }
+
+        [HttpPatch("{id}/active")]
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> SetWorkerActive(int id, [FromBody] SetActiveRequest request)
+        {
+            try
+            {
+                await _workerService.SetActiveAsync(id, request.IsActive);
+                return Ok(new { message = request.IsActive ? "Worker activated successfully" : "Worker deactivated successfully" });
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+        }
+
+        private WorkerDto MapWorkerDto(Worker worker)
+        {
+            return new WorkerDto
+            {
+                Id = worker.Id,
+                FirstName = worker.FirstName,
+                LastName = worker.LastName,
+                Email = worker.Email,
+                PhoneNumber = worker.PhoneNumber,
+                JMBG = worker.JMBG,
+                Gender = worker.Gender,
+                DateOfBirth = worker.DateOfBirth,
+                CreatedAt = worker.CreatedAt,
+                AddressId = worker.AddressId,
+                Role = GetRoleName(worker),
+                ClinicId = worker.ClinicId,
+                ClinicName = worker.Clinic?.Name,
+                IsActive = worker.IsActive,
+                Specialty = worker is Doctor doctor ? doctor.Specialty : null,
+                LicenseNumber = worker is Doctor doctorWorker ? doctorWorker.LicenseNumber : null,
+                Qualification = worker is Secretary secretary ? secretary.Qualification : null,
+                SeniorityLevel = worker is Administrator administrator ? administrator.SeniorityLevel : null,
+            };
         }
 
         private string GetRoleName(Worker worker)
@@ -107,9 +166,13 @@ namespace Klinika.Controllers
         }
     }
 
-    // DTO
     public class AssignClinicRequest
     {
         public int? ClinicId { get; set; }
+    }
+
+    public class SetActiveRequest
+    {
+        public bool IsActive { get; set; }
     }
 }

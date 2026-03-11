@@ -20,7 +20,12 @@ namespace Klinika.Services
             _cityRepository = cityRepository;
         }
 
-        public async Task<Worker?> GetByIdAsync(int id)
+        public async Task<List<Worker>> GetAllAsync()
+        {
+            return await _workerRepository.GetAllAsync();
+        }
+
+        public async Task<Worker> GetByIdAsync(int id)
         {
             var worker = await _workerRepository.GetByIdAsync(id);
             if (worker == null)
@@ -126,6 +131,64 @@ namespace Klinika.Services
             return worker;
         }
 
+        public async Task<Worker> UpdateAsync(int id, UpdateWorkerRequest request)
+        {
+            var worker = await _workerRepository.GetByIdAsync(id);
+            if (worker == null)
+            {
+                throw new KeyNotFoundException($"Worker with ID {id} not found.");
+            }
+
+            var existingWorker = await _workerRepository.GetByEmailAsync(request.Email);
+            if (existingWorker != null && existingWorker.Id != id)
+            {
+                throw new InvalidOperationException("Email already exists");
+            }
+
+            var currentRole = worker switch
+            {
+                Administrator => "Administrator",
+                Doctor => "Doctor",
+                Secretary => "Secretary",
+                _ => throw new ArgumentException("Invalid worker type")
+            };
+
+            if (!string.Equals(request.Role, currentRole, StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException("Changing worker roles is not supported by this endpoint.");
+            }
+
+            worker.Email = request.Email;
+            worker.FirstName = request.FirstName;
+            worker.LastName = request.LastName;
+            worker.PhoneNumber = request.PhoneNumber;
+            worker.JMBG = request.JMBG;
+            worker.Gender = request.Gender;
+            worker.DateOfBirth = request.DateOfBirth;
+            worker.ClinicId = request.ClinicId;
+
+            if (!string.IsNullOrWhiteSpace(request.NewPassword))
+            {
+                worker.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+            }
+
+            switch (worker)
+            {
+                case Administrator administrator:
+                    administrator.SeniorityLevel = request.SeniorityLevel;
+                    break;
+                case Doctor doctor:
+                    doctor.Specialty = request.Specialty;
+                    doctor.LicenseNumber = request.LicenseNumber;
+                    break;
+                case Secretary secretary:
+                    secretary.Qualification = request.Qualification;
+                    break;
+            }
+
+            return await _workerRepository.UpdateAsync(worker);
+        }
+
         private async Task<int?> ResolveAddressAsync(CreateWorkerRequest request)
         {
             if (request.AddressId.HasValue)
@@ -160,6 +223,17 @@ namespace Klinika.Services
             }
 
             return null;
+        }
+
+        public async Task SetActiveAsync(int id, bool isActive)
+        {
+            var worker = await _workerRepository.GetByIdAsync(id);
+            if (worker == null)
+            {
+                throw new KeyNotFoundException($"Worker with ID {id} not found.");
+            }
+            worker.IsActive = isActive;
+            await _workerRepository.UpdateAsync(worker);
         }
     }
 }

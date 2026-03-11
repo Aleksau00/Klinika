@@ -2,6 +2,7 @@
 
 public interface IWorkerRepository
 {
+    Task<List<Worker>> GetAllAsync();
     Task<Worker> GetByIdAsync(int id);
     Task<Worker> GetByEmailAsync(string email);
 
