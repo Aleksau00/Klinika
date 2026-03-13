@@ -34,6 +34,7 @@ namespace Klinika.Repositories
         public async Task<IEnumerable<Appointment>> GetByPatientIdAsync(int patientId)
         {
             return await _context.Appointments
+                .Include(a => a.Patient)
                 .Include(a => a.Doctor)
                 .Include(a => a.Clinic)
                 .Include(a => a.BookedByWorker)
@@ -47,7 +48,9 @@ namespace Klinika.Repositories
         {
             var query = _context.Appointments
                 .Include(a => a.Patient)
+                .Include(a => a.Doctor)
                 .Include(a => a.Clinic)
+                .Include(a => a.BookedByWorker)
                 .Where(a => a.DoctorId == doctorId);
 
             if (date.HasValue)
@@ -66,6 +69,8 @@ namespace Klinika.Repositories
             return await _context.Appointments
                 .Include(a => a.Patient)
                 .Include(a => a.Doctor)
+                .Include(a => a.Clinic)
+                .Include(a => a.BookedByWorker)
                 .Where(a => a.ClinicId == clinicId && a.ScheduledDate == date)
                 .OrderBy(a => a.ScheduledStartTime)
                 .ToListAsync();

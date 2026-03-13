@@ -27,6 +27,22 @@ namespace Klinika.Controllers
             return Ok(workers.Select(MapWorkerDto));
         }
 
+        [HttpGet("doctors")]
+        [Authorize(Roles = "Secretary,Administrator")]
+        public async Task<ActionResult<IEnumerable<WorkerDto>>> GetDoctors([FromQuery] int? clinicId = null)
+        {
+            var workers = await _workerService.GetAllAsync();
+
+            var doctors = workers
+                .Where(w => w is Doctor)
+                .Where(w => w.IsActive)
+                .Where(w => !clinicId.HasValue || w.ClinicId == clinicId.Value)
+                .Select(MapWorkerDto)
+                .ToList();
+
+            return Ok(doctors);
+        }
+
         [HttpGet("me")]
         public async Task<IActionResult> GetCurrentWorker()
         {

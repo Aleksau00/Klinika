@@ -3,6 +3,7 @@ using Klinika.Models.DTOs;
 using Klinika.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace Klinika.Controllers
@@ -40,6 +41,10 @@ namespace Klinika.Controllers
             catch (InvalidOperationException ex)
             {
                 return BadRequest(ex.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return Conflict("This appointment slot is already booked. Please select a different slot.");
             }
         }
 
@@ -145,6 +150,10 @@ namespace Klinika.Controllers
             catch (KeyNotFoundException ex)
             {
                 return NotFound(ex.Message);
+            }
+            catch (InvalidOperationException ex) when (ex.Message.Contains("already cancelled"))
+            {
+                return Ok(new { Message = "Appointment was already cancelled." });
             }
             catch (InvalidOperationException ex)
             {

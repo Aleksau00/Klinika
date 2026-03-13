@@ -68,6 +68,7 @@ namespace Klinika.Repositories
         public async Task<IEnumerable<VaccinationRecord>> GetPatientVaccinationRecordsAsync(int patientId)
         {
             return await _context.VaccinationRecords
+                .Include(vr => vr.Patient)
                 .Include(vr => vr.Vaccination)
                 .Include(vr => vr.AdministeredByDoctor)
                 .Where(vr => vr.PatientId == patientId)

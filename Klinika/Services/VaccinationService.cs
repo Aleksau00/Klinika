@@ -134,13 +134,17 @@ namespace Klinika.Services
             {
                 Id = record.Id,
                 PatientId = record.PatientId,
-                PatientName = $"{record.Patient.FirstName} {record.Patient.LastName}",
+                PatientName = record.Patient != null
+                    ? $"{record.Patient.FirstName} {record.Patient.LastName}"
+                    : $"Patient #{record.PatientId}",
                 VaccinationId = record.VaccinationId,
-                VaccinationName = record.Vaccination.Name,
+                VaccinationName = record.Vaccination?.Name ?? $"Vaccination #{record.VaccinationId}",
                 AdministeredDate = record.AdministeredDate,
                 Notes = record.Notes,
                 AdministeredByDoctorId = record.AdministeredByDoctorId,
-                AdministeredByDoctorName = $"{record.AdministeredByDoctor.FirstName} {record.AdministeredByDoctor.LastName}"
+                AdministeredByDoctorName = record.AdministeredByDoctor != null
+                    ? $"{record.AdministeredByDoctor.FirstName} {record.AdministeredByDoctor.LastName}"
+                    : $"Doctor #{record.AdministeredByDoctorId}"
             };
         }
     }

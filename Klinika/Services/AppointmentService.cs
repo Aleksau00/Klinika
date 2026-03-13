@@ -151,7 +151,7 @@ namespace Klinika.Services
                 throw new InvalidOperationException("Cannot cancel a completed appointment");
 
             if (appointment.Status == AppointmentStatus.Cancelled)
-                throw new InvalidOperationException("Appointment is already cancelled");
+                return true; // make DELETE idempotent instead of throwing
 
             // 48-hour cancellation rule
             var appointmentDateTime = appointment.ScheduledDate.ToDateTime(appointment.ScheduledStartTime);
