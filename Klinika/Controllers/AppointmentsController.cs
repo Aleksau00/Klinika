@@ -79,10 +79,15 @@ namespace Klinika.Controllers
         [HttpGet("doctor/{doctorId}")]
         [Authorize(Roles = "Secretary,Doctor,Administrator")]
         public async Task<ActionResult<IEnumerable<AppointmentDto>>> GetDoctorSchedule(
-            int doctorId, 
-            [FromQuery] string? date = null)
+            int doctorId,
+            [FromQuery] string? date = null,
+            [FromQuery] string? fromDate = null,
+            [FromQuery] string? toDate = null)
         {
             DateOnly? parsedDate = null;
+            DateOnly? parsedFromDate = null;
+            DateOnly? parsedToDate = null;
+
             if (!string.IsNullOrEmpty(date))
             {
                 if (!DateOnly.TryParse(date, out var tempDate))
@@ -90,7 +95,33 @@ namespace Klinika.Controllers
                 parsedDate = tempDate;
             }
 
-            var appointments = await _appointmentService.GetDoctorScheduleAsync(doctorId, parsedDate);
+            if (!string.IsNullOrEmpty(fromDate))
+            {
+                if (!DateOnly.TryParse(fromDate, out var tempFromDate))
+                    return BadRequest("Invalid fromDate format. Use YYYY-MM-DD");
+                parsedFromDate = tempFromDate;
+            }
+
+            if (!string.IsNullOrEmpty(toDate))
+            {
+                if (!DateOnly.TryParse(toDate, out var tempToDate))
+                    return BadRequest("Invalid toDate format. Use YYYY-MM-DD");
+                parsedToDate = tempToDate;
+            }
+
+            if (parsedDate.HasValue && (parsedFromDate.HasValue || parsedToDate.HasValue))
+                return BadRequest("Use either 'date' or 'fromDate/toDate', not both.");
+
+            if (parsedDate.HasValue)
+            {
+                parsedFromDate = parsedDate;
+                parsedToDate = parsedDate;
+            }
+
+            if (parsedFromDate.HasValue && parsedToDate.HasValue && parsedFromDate > parsedToDate)
+                return BadRequest("fromDate must be less than or equal to toDate.");
+
+            var appointments = await _appointmentService.GetDoctorScheduleAsync(doctorId, parsedFromDate, parsedToDate);
             return Ok(appointments);
         }
 

@@ -103,9 +103,9 @@ namespace Klinika.Services
             return dtos;
         }
 
-        public async Task<IEnumerable<AppointmentDto>> GetDoctorScheduleAsync(int doctorId, DateOnly? date = null)
+        public async Task<IEnumerable<AppointmentDto>> GetDoctorScheduleAsync(int doctorId, DateOnly? fromDate = null, DateOnly? toDate = null)
         {
-            var appointments = await _appointmentRepository.GetByDoctorIdAsync(doctorId, date);
+            var appointments = await _appointmentRepository.GetByDoctorIdAsync(doctorId, fromDate, toDate);
             var dtos = new List<AppointmentDto>();
             foreach (var appointment in appointments)
             {

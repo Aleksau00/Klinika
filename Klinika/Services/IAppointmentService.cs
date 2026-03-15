@@ -10,7 +10,7 @@ namespace Klinika.Services
         // Retrieval
         Task<AppointmentDto?> GetAppointmentByIdAsync(int id);
         Task<IEnumerable<AppointmentDto>> GetPatientAppointmentsAsync(int patientId);
-        Task<IEnumerable<AppointmentDto>> GetDoctorScheduleAsync(int doctorId, DateOnly? date = null);
+        Task<IEnumerable<AppointmentDto>> GetDoctorScheduleAsync(int doctorId, DateOnly? fromDate = null, DateOnly? toDate = null);
         Task<IEnumerable<AppointmentDto>> GetClinicScheduleAsync(int clinicId, DateOnly date);
 
         // Lifecycle Management (Secretary)
