@@ -125,7 +125,7 @@ namespace Klinika.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Secretary,Administrator")]
-        public async Task<ActionResult<GuardianDto>> UpdateGuardianContact(int id, [FromBody] UpdateGuardianContactRequest request)
+        public async Task<ActionResult<GuardianDto>> UpdateGuardian(int id, [FromBody] UpdateGuardianRequest request)
         {
             var guardian = await _context.Guardians.FirstOrDefaultAsync(g => g.Id == id);
             if (guardian == null)
@@ -133,9 +133,30 @@ namespace Klinika.Controllers
                 return NotFound(new { message = $"Guardian with ID {id} not found" });
             }
 
+            if (string.IsNullOrWhiteSpace(request.FirstName) || string.IsNullOrWhiteSpace(request.LastName))
+            {
+                return BadRequest(new { message = "First name and last name are required." });
+            }
+
             if (string.IsNullOrWhiteSpace(request.PhoneNumber))
             {
                 return BadRequest(new { message = "Phone number is required." });
+            }
+
+            if (string.IsNullOrWhiteSpace(request.JMBG) || request.JMBG.Length != 13 || !request.JMBG.All(char.IsDigit))
+            {
+                return BadRequest(new { message = "JMBG must be exactly 13 digits." });
+            }
+
+            var age = DateTime.UtcNow.Year - request.DateOfBirth.Year;
+            if (request.DateOfBirth.Date > DateTime.UtcNow.Date.AddYears(-age))
+            {
+                age -= 1;
+            }
+
+            if (age < 18)
+            {
+                return BadRequest(new { message = "Guardian must be at least 18 years old." });
             }
 
             if (!string.IsNullOrWhiteSpace(request.Email))
@@ -147,8 +168,20 @@ namespace Klinika.Controllers
                 }
             }
 
+            var jmbgExists = await _context.Set<Person>().AnyAsync(p => p.JMBG == request.JMBG && p.Id != id);
+            if (jmbgExists)
+            {
+                return BadRequest(new { message = "JMBG already exists." });
+            }
+
+            guardian.FirstName = request.FirstName;
+            guardian.LastName = request.LastName;
             guardian.Email = request.Email;
             guardian.PhoneNumber = request.PhoneNumber;
+            guardian.JMBG = request.JMBG;
+            guardian.Gender = request.Gender;
+            guardian.DateOfBirth = request.DateOfBirth;
+            guardian.AddressId = request.AddressId;
 
             await _context.SaveChangesAsync();
 
