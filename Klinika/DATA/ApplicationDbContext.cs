@@ -585,7 +585,7 @@ namespace Klinika.DATA
                     AddressId = 9,
                     ClinicId = 1,
                     PasswordHash = "$2a$11$9P.it7ACUqHO8E4jPTtWPeg2smro6UFF7CFueUL5TLokpHqEmFBRe",
-                    Specialty = "Cardiology",
+                    Specialty = "General Pediatrics",
                     LicenseNumber = "LIC-2010-001",
                     CreatedAt = new DateTime(2024, 1, 20),
                     IsActive = true
@@ -603,7 +603,7 @@ namespace Klinika.DATA
                     AddressId = 10,
                     ClinicId = 1,
                     PasswordHash = "$2a$11$9P.it7ACUqHO8E4jPTtWPeg2smro6UFF7CFueUL5TLokpHqEmFBRe",
-                    Specialty = "Pediatrics",
+                    Specialty = "Neonatology",
                     LicenseNumber = "LIC-2012-045",
                     CreatedAt = new DateTime(2024, 1, 20),
                     IsActive = true
@@ -621,7 +621,7 @@ namespace Klinika.DATA
                     AddressId = 11,
                     ClinicId = 1,
                     PasswordHash = "$2a$11$9P.it7ACUqHO8E4jPTtWPeg2smro6UFF7CFueUL5TLokpHqEmFBRe",
-                    Specialty = "General Practice",
+                    Specialty = "Developmental-Behavioral Pediatrics",
                     LicenseNumber = "LIC-2008-123",
                     CreatedAt = new DateTime(2024, 1, 20),
                     IsActive = true
@@ -639,7 +639,7 @@ namespace Klinika.DATA
                     AddressId = 12,
                     ClinicId = 1,
                     PasswordHash = "$2a$11$9P.it7ACUqHO8E4jPTtWPeg2smro6UFF7CFueUL5TLokpHqEmFBRe",
-                    Specialty = "Dermatology",
+                    Specialty = "Pediatric Dermatology",
                     LicenseNumber = "LIC-2015-078",
                     CreatedAt = new DateTime(2024, 1, 20),
                     IsActive = true
@@ -657,7 +657,7 @@ namespace Klinika.DATA
                     AddressId = 13,
                     ClinicId = 1,
                     PasswordHash = "$2a$11$9P.it7ACUqHO8E4jPTtWPeg2smro6UFF7CFueUL5TLokpHqEmFBRe",
-                    Specialty = "Orthopedics",
+                    Specialty = "Pediatric Orthopedics",
                     LicenseNumber = "LIC-2011-092",
                     CreatedAt = new DateTime(2024, 1, 20),
                     IsActive = true
@@ -677,7 +677,7 @@ namespace Klinika.DATA
                     AddressId = 14,
                     ClinicId = 2,
                     PasswordHash = "$2a$11$9P.it7ACUqHO8E4jPTtWPeg2smro6UFF7CFueUL5TLokpHqEmFBRe",
-                    Specialty = "Neurology",
+                    Specialty = "Pediatric Neurology",
                     LicenseNumber = "LIC-2014-156",
                     CreatedAt = new DateTime(2024, 2, 5),
                     IsActive = true
@@ -695,7 +695,7 @@ namespace Klinika.DATA
                     AddressId = 15,
                     ClinicId = 2,
                     PasswordHash = "$2a$11$9P.it7ACUqHO8E4jPTtWPeg2smro6UFF7CFueUL5TLokpHqEmFBRe",
-                    Specialty = "Psychiatry",
+                    Specialty = "Child and Adolescent Psychiatry",
                     LicenseNumber = "LIC-2009-201",
                     CreatedAt = new DateTime(2024, 2, 5),
                     IsActive = true
@@ -713,7 +713,7 @@ namespace Klinika.DATA
                     AddressId = 16,
                     ClinicId = 2,
                     PasswordHash = "$2a$11$9P.it7ACUqHO8E4jPTtWPeg2smro6UFF7CFueUL5TLokpHqEmFBRe",
-                    Specialty = "Ophthalmology",
+                    Specialty = "Pediatric Ophthalmology",
                     LicenseNumber = "LIC-2016-234",
                     CreatedAt = new DateTime(2024, 2, 5),
                     IsActive = true
@@ -731,7 +731,7 @@ namespace Klinika.DATA
                     AddressId = 17,
                     ClinicId = 2,
                     PasswordHash = "$2a$11$9P.it7ACUqHO8E4jPTtWPeg2smro6UFF7CFueUL5TLokpHqEmFBRe",
-                    Specialty = "ENT",
+                    Specialty = "Pediatric Otolaryngology",
                     LicenseNumber = "LIC-2013-189",
                     CreatedAt = new DateTime(2024, 2, 5),
                     IsActive = true
@@ -751,7 +751,7 @@ namespace Klinika.DATA
                     AddressId = 18,
                     ClinicId = 3,
                     PasswordHash = "$2a$11$9P.it7ACUqHO8E4jPTtWPeg2smro6UFF7CFueUL5TLokpHqEmFBRe",
-                    Specialty = "Gynecology",
+                    Specialty = "Pediatric and Adolescent Gynecology",
                     LicenseNumber = "LIC-2017-267",
                     CreatedAt = new DateTime(2024, 2, 15),
                     IsActive = true
@@ -769,7 +769,7 @@ namespace Klinika.DATA
                     AddressId = 19,
                     ClinicId = 3,
                     PasswordHash = "$2a$11$9P.it7ACUqHO8E4jPTtWPeg2smro6UFF7CFueUL5TLokpHqEmFBRe",
-                    Specialty = "Surgery",
+                    Specialty = "Pediatric Surgery",
                     LicenseNumber = "LIC-2010-301",
                     CreatedAt = new DateTime(2024, 2, 15),
                     IsActive = true
@@ -787,7 +787,7 @@ namespace Klinika.DATA
                     AddressId = 20,
                     ClinicId = 3,
                     PasswordHash = "$2a$11$9P.it7ACUqHO8E4jPTtWPeg2smro6UFF7CFueUL5TLokpHqEmFBRe",
-                    Specialty = "Endocrinology",
+                    Specialty = "Pediatric Endocrinology",
                     LicenseNumber = "LIC-2014-345",
                     CreatedAt = new DateTime(2024, 2, 15),
                     IsActive = true
@@ -807,7 +807,7 @@ namespace Klinika.DATA
                     AddressId = 21,
                     ClinicId = 4,
                     PasswordHash = "$2a$11$9P.it7ACUqHO8E4jPTtWPeg2smro6UFF7CFueUL5TLokpHqEmFBRe",
-                    Specialty = "Urology",
+                    Specialty = "Pediatric Urology",
                     LicenseNumber = "LIC-2008-412",
                     CreatedAt = new DateTime(2024, 3, 5),
                     IsActive = true
@@ -825,7 +825,7 @@ namespace Klinika.DATA
                     AddressId = 22,
                     ClinicId = 4,
                     PasswordHash = "$2a$11$9P.it7ACUqHO8E4jPTtWPeg2smro6UFF7CFueUL5TLokpHqEmFBRe",
-                    Specialty = "Pulmonology",
+                    Specialty = "Pediatric Pulmonology",
                     LicenseNumber = "LIC-2016-478",
                     CreatedAt = new DateTime(2024, 3, 5),
                     IsActive = true
@@ -845,7 +845,7 @@ namespace Klinika.DATA
                     AddressId = 23,
                     ClinicId = 5,
                     PasswordHash = "$2a$11$9P.it7ACUqHO8E4jPTtWPeg2smro6UFF7CFueUL5TLokpHqEmFBRe",
-                    Specialty = "Rheumatology",
+                    Specialty = "Pediatric Rheumatology",
                     LicenseNumber = "LIC-2012-523",
                     CreatedAt = new DateTime(2024, 3, 20),
                     IsActive = true
@@ -863,7 +863,7 @@ namespace Klinika.DATA
                     AddressId = 24,
                     ClinicId = 5,
                     PasswordHash = "$2a$11$9P.it7ACUqHO8E4jPTtWPeg2smro6UFF7CFueUL5TLokpHqEmFBRe",
-                    Specialty = "Gastroenterology",
+                    Specialty = "Pediatric Gastroenterology",
                     LicenseNumber = "LIC-2018-589",
                     CreatedAt = new DateTime(2024, 3, 20),
                     IsActive = true
@@ -1077,7 +1077,7 @@ namespace Klinika.DATA
                     JMBG = "9156382704418",
                     Gender = "M",
                     BloodType = "A+",
-                    DateOfBirth = new DateTime(1995, 1, 1),
+                    DateOfBirth = new DateTime(2004, 1, 1),
                     AddressId = 25, // Beograd
                     NoShowCount = 0,
                     CreatedAt = new DateTime(2025, 1, 20)
@@ -1092,7 +1092,7 @@ namespace Klinika.DATA
                     JMBG = "3481209576835",
                     BloodType = "A+",
                     Gender = "F",
-                    DateOfBirth = new DateTime(1992, 2, 15),
+                    DateOfBirth = new DateTime(2003, 2, 15),
                     AddressId = 26, // Beograd
                     NoShowCount = 1, // Has 1 no-show
                     CreatedAt = new DateTime(2025, 1, 20)
@@ -1107,7 +1107,7 @@ namespace Klinika.DATA
                     BloodType = "A+",
                     JMBG = "6702891435207",
                     Gender = "M",
-                    DateOfBirth = new DateTime(1998, 3, 20),
+                    DateOfBirth = new DateTime(2006, 3, 20),
                     AddressId = 27, // Novi Sad
                     NoShowCount = 0,
                     CreatedAt = new DateTime(2025, 1, 20)
@@ -1122,7 +1122,7 @@ namespace Klinika.DATA
                     BloodType = "A+",
                     JMBG = "1847362905814",
                     Gender = "F",
-                    DateOfBirth = new DateTime(1993, 6, 12),
+                    DateOfBirth = new DateTime(2002, 6, 12),
                     AddressId = 28, // Novi Sad
                     NoShowCount = 0,
                     CreatedAt = new DateTime(2025, 1, 20)
@@ -1137,7 +1137,7 @@ namespace Klinika.DATA
                     PhoneNumber = "060-555-0005",
                     JMBG = "7284056193726",
                     Gender = "M",
-                    DateOfBirth = new DateTime(1996, 9, 5),
+                    DateOfBirth = new DateTime(2007, 9, 5),
                     AddressId = 29, // Niš
                     NoShowCount = 2, // Has 2 no-shows
                     CreatedAt = new DateTime(2025, 1, 20)
@@ -1152,7 +1152,7 @@ namespace Klinika.DATA
                     JMBG = "5931628470159",
                     BloodType = "A+",
                     Gender = "F",
-                    DateOfBirth = new DateTime(1994, 1, 28),
+                    DateOfBirth = new DateTime(2001, 1, 28),
                     AddressId = 29, // Niš
                     NoShowCount = 0,
                     CreatedAt = new DateTime(2025, 1, 20)
@@ -1244,7 +1244,7 @@ namespace Klinika.DATA
                 new AppointmentSlot { Id = 9, DoctorId = 4, Date = new DateOnly(2026, 2, 12), StartTime = new TimeOnly(11, 0), EndTime = new TimeOnly(11, 15), IsAvailable = true }
             );
 
-            // Slots for Dr. Ana Jovanović (Pediatrician, Beograd) - ID 5
+            // Slots for Dr. Ana Jovanović (Neonatologist, Beograd) - ID 5
             modelBuilder.Entity<AppointmentSlot>().HasData(
                 new AppointmentSlot { Id = 10, DoctorId = 5, Date = new DateOnly(2026, 2, 10), StartTime = new TimeOnly(10, 0), EndTime = new TimeOnly(10, 15), IsAvailable = false },
                 new AppointmentSlot { Id = 11, DoctorId = 5, Date = new DateOnly(2026, 2, 10), StartTime = new TimeOnly(10, 15), EndTime = new TimeOnly(10, 30), IsAvailable = true },
@@ -1253,7 +1253,7 @@ namespace Klinika.DATA
                 new AppointmentSlot { Id = 14, DoctorId = 5, Date = new DateOnly(2026, 2, 11), StartTime = new TimeOnly(14, 15), EndTime = new TimeOnly(14, 30), IsAvailable = true }
             );
 
-            // Slots for Dr. Jelena Popović (Neurologist, Novi Sad) - ID 9
+            // Slots for Dr. Jelena Popović (Pediatric Neurologist, Novi Sad) - ID 9
             modelBuilder.Entity<AppointmentSlot>().HasData(
                 new AppointmentSlot { Id = 15, DoctorId = 9, Date = new DateOnly(2026, 2, 10), StartTime = new TimeOnly(13, 0), EndTime = new TimeOnly(13, 15), IsAvailable = false },
                 new AppointmentSlot { Id = 16, DoctorId = 9, Date = new DateOnly(2026, 2, 10), StartTime = new TimeOnly(13, 15), EndTime = new TimeOnly(13, 30), IsAvailable = true },
@@ -1261,7 +1261,7 @@ namespace Klinika.DATA
                 new AppointmentSlot { Id = 18, DoctorId = 9, Date = new DateOnly(2026, 2, 11), StartTime = new TimeOnly(15, 15), EndTime = new TimeOnly(15, 30), IsAvailable = true }
             );
 
-            // Slots for Dr. Aleksandra Ilić (Gynecologist, Niš) - ID 13
+            // Slots for Dr. Aleksandra Ilić (Pediatric and Adolescent Gynecologist, Niš) - ID 13
             modelBuilder.Entity<AppointmentSlot>().HasData(
                 new AppointmentSlot { Id = 19, DoctorId = 13, Date = new DateOnly(2026, 2, 10), StartTime = new TimeOnly(11, 0), EndTime = new TimeOnly(11, 15), IsAvailable = true },
                 new AppointmentSlot { Id = 20, DoctorId = 13, Date = new DateOnly(2026, 2, 10), StartTime = new TimeOnly(11, 15), EndTime = new TimeOnly(11, 30), IsAvailable = true },
