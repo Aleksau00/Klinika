@@ -286,7 +286,18 @@ namespace Klinika.DATA
                 new Allergen { Id = 6, Name = "Aspirin", Description = "Alergija na aspirin i NSAIL lekove" },
                 new Allergen { Id = 7, Name = "Prašina", Description = "Alergija na kućnu prašinu i grinje" },
                 new Allergen { Id = 8, Name = "Mačja dlaka", Description = "Alergija na mačju dlaku" },
-                new Allergen { Id = 9, Name = "Sulfonamidi", Description = "Alergija na sulfonamidne antibiotike" }
+                new Allergen { Id = 9, Name = "Sulfonamidi", Description = "Alergija na sulfonamidne antibiotike" },
+                new Allergen { Id = 10, Name = "Gluten", Description = "Alergija na gluten i pšenicu (celijakija i netolerancija pšenice)" },
+                new Allergen { Id = 11, Name = "Jaja", Description = "Alergija na jaja i proizvode koji sadrže jaja" },
+                new Allergen { Id = 12, Name = "Kravlje mleko", Description = "Alergija na proteine kravljeg mleka (IgE-posredovana)" },
+                new Allergen { Id = 13, Name = "Soja", Description = "Alergija na soju i proizvode sa sojom" },
+                new Allergen { Id = 14, Name = "Orašasti plodovi", Description = "Alergija na orašaste plodove (orah, lešnik, badem, indijski orah)" },
+                new Allergen { Id = 15, Name = "Riba", Description = "Alergija na ribu i riblje proizvode" },
+                new Allergen { Id = 16, Name = "Školjke", Description = "Alergija na školjke i plodove mora" },
+                new Allergen { Id = 17, Name = "Sezam", Description = "Alergija na sezam i sezamovo ulje" },
+                new Allergen { Id = 18, Name = "Pčelinji otrov", Description = "Alergija na ubod pčele ili ose (himenoptera venom alergija)" },
+                new Allergen { Id = 19, Name = "Amoksicilin", Description = "Alergija na amoksicilin i aminopenicilinske antibiotike" },
+                new Allergen { Id = 20, Name = "Lateks", Description = "Alergija na lateks i prirodne gumene proizvode" }
             );
 
             modelBuilder.Entity<Vaccination>().HasData(
