@@ -2,6 +2,7 @@ using Klinika.DATA;
 using Klinika.Models;
 using Klinika.Models.DTOs;
 using Klinika.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace Klinika.Services
 {
@@ -125,11 +126,14 @@ namespace Klinika.Services
             return dtos;
         }
 
-        public async Task<AppointmentDto> CheckInPatientAsync(int appointmentId)
+        public async Task<AppointmentDto> CheckInPatientAsync(int appointmentId, int? actorDoctorId = null)
         {
             var appointment = await _appointmentRepository.GetByIdWithDetailsAsync(appointmentId);
             if (appointment == null)
                 throw new KeyNotFoundException($"Appointment with ID {appointmentId} not found");
+
+            if (actorDoctorId.HasValue && appointment.DoctorId != actorDoctorId.Value)
+                throw new InvalidOperationException("Doctor can only start appointments assigned to them.");
 
             if (appointment.Status != AppointmentStatus.Scheduled)
                 throw new InvalidOperationException($"Cannot check in appointment with status: {appointment.Status}");
@@ -229,7 +233,7 @@ namespace Klinika.Services
             return await MapToDtoAsync(treatmentAppointment);
         }
 
-        public async Task<AppointmentDto> CompletePreventiveAppointmentAsync(int id, CompletePreventiveRequest request)
+        public async Task<AppointmentDto> CompletePreventiveAppointmentAsync(int id, CompletePreventiveRequest request, int doctorId)
         {
             var appointment = await _appointmentRepository.GetByIdWithDetailsAsync(id);
             if (appointment == null)
@@ -238,14 +242,62 @@ namespace Klinika.Services
             if (appointment is not PreventiveAppointment preventiveAppointment)
                 throw new InvalidOperationException("Appointment is not a preventive appointment");
 
+            if (preventiveAppointment.DoctorId != doctorId)
+                throw new InvalidOperationException("Doctor can only complete preventive appointments assigned to them.");
+
             if (appointment.Status != AppointmentStatus.InProgress)
                 throw new InvalidOperationException($"Cannot complete appointment with status: {appointment.Status}");
 
+            var hasPreventiveContent = !string.IsNullOrWhiteSpace(request.PreventiveNotes)
+                || !string.IsNullOrWhiteSpace(request.ChildDevelopmentNotes);
+            var wantsVaccination = request.IsVaccination == true || request.VaccinationId.HasValue;
+
+            if (!hasPreventiveContent && !wantsVaccination)
+                throw new InvalidOperationException("Provide preventive notes, child development notes, or vaccination details.");
+
             preventiveAppointment.PreventiveNotes = request.PreventiveNotes;
+            preventiveAppointment.ChildDevelopmentNotes = request.ChildDevelopmentNotes;
+
+            if (wantsVaccination)
+            {
+                if (!request.VaccinationId.HasValue)
+                    throw new InvalidOperationException("VaccinationId is required when recording vaccination in preventive completion.");
+
+                var vaccination = await _context.Vaccinations.FindAsync(request.VaccinationId.Value);
+                if (vaccination == null)
+                    throw new KeyNotFoundException($"Vaccination with ID {request.VaccinationId.Value} not found");
+
+                preventiveAppointment.IsVaccination = true;
+                preventiveAppointment.VaccinationId = request.VaccinationId.Value;
+
+                var existingRecord = await _context.VaccinationRecords
+                    .FirstOrDefaultAsync(v => v.PreventiveAppointmentId == preventiveAppointment.Id);
+
+                if (existingRecord == null)
+                {
+                    _context.VaccinationRecords.Add(new VaccinationRecord
+                    {
+                        PatientId = preventiveAppointment.PatientId,
+                        VaccinationId = request.VaccinationId.Value,
+                        AdministeredDate = DateTime.UtcNow,
+                        Notes = request.VaccinationNotes,
+                        AdministeredByDoctorId = doctorId,
+                        PreventiveAppointmentId = preventiveAppointment.Id
+                    });
+                }
+                else
+                {
+                    existingRecord.VaccinationId = request.VaccinationId.Value;
+                    existingRecord.Notes = request.VaccinationNotes;
+                    existingRecord.AdministeredByDoctorId = doctorId;
+                    existingRecord.AdministeredDate = DateTime.UtcNow;
+                }
+            }
+
             preventiveAppointment.Status = AppointmentStatus.Completed;
             preventiveAppointment.CompletedAt = DateTime.UtcNow;
 
-            await _appointmentRepository.UpdateAsync(preventiveAppointment);
+            await _context.SaveChangesAsync();
             return await MapToDtoAsync(preventiveAppointment);
         }
 
@@ -286,6 +338,10 @@ namespace Klinika.Services
             else if (appointment is PreventiveAppointment preventiveAppointment)
             {
                 dto.PreventiveNotes = preventiveAppointment.PreventiveNotes;
+                dto.ChildDevelopmentNotes = preventiveAppointment.ChildDevelopmentNotes;
+                dto.IsVaccination = preventiveAppointment.IsVaccination;
+                dto.VaccinationId = preventiveAppointment.VaccinationId;
+                dto.VaccinationNotes = preventiveAppointment.VaccinationRecord?.Notes;
             }
 
             return dto;

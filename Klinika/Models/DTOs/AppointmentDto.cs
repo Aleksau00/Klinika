@@ -38,6 +38,10 @@
 
         // Preventive Fields (null if Treatment)
         public string? PreventiveNotes { get; set; }
+        public string? ChildDevelopmentNotes { get; set; }
+        public bool? IsVaccination { get; set; }
+        public int? VaccinationId { get; set; }
+        public string? VaccinationNotes { get; set; }
 
         // Timestamps
         public DateTime? CheckedInAt { get; set; }
@@ -63,7 +67,11 @@
 
     public class CompletePreventiveRequest
     {
-        public string PreventiveNotes { get; set; }
+        public string? PreventiveNotes { get; set; }
+        public string? ChildDevelopmentNotes { get; set; }
+        public bool? IsVaccination { get; set; }
+        public int? VaccinationId { get; set; }
+        public string? VaccinationNotes { get; set; }
     }
 
     public class CancelAppointmentRequest

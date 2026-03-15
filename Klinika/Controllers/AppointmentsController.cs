@@ -145,15 +145,21 @@ namespace Klinika.Controllers
         }
 
         /// <summary>
-        /// Check in patient for appointment (moves from Scheduled to InProgress)
+        /// Start appointment (moves from Scheduled to InProgress)
         /// </summary>
         [HttpPut("{id}/check-in")]
-        [Authorize(Roles = "Secretary,Administrator")]
+        [Authorize(Roles = "Secretary,Doctor,Administrator")]
         public async Task<ActionResult<AppointmentDto>> CheckInPatient(int id)
         {
             try
             {
-                var appointment = await _appointmentService.CheckInPatientAsync(id);
+                int? actorDoctorId = null;
+                if (User.IsInRole("Doctor"))
+                {
+                    actorDoctorId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                }
+
+                var appointment = await _appointmentService.CheckInPatientAsync(id, actorDoctorId);
                 return Ok(appointment);
             }
             catch (KeyNotFoundException ex)
@@ -251,7 +257,8 @@ namespace Klinika.Controllers
         {
             try
             {
-                var appointment = await _appointmentService.CompletePreventiveAppointmentAsync(id, request);
+                var doctorId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                var appointment = await _appointmentService.CompletePreventiveAppointmentAsync(id, request, doctorId);
                 return Ok(appointment);
             }
             catch (KeyNotFoundException ex)
