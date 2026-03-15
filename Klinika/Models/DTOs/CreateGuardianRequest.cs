@@ -11,4 +11,10 @@ namespace Klinika.Models.DTOs
         public DateTime DateOfBirth { get; set; }
         public int? AddressId { get; set; }
     }
+
+    public class UpdateGuardianContactRequest
+    {
+        public string? Email { get; set; }
+        public required string PhoneNumber { get; set; }
+    }
 }

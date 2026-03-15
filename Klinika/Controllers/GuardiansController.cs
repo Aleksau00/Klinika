@@ -123,6 +123,38 @@ namespace Klinika.Controllers
             return CreatedAtAction(nameof(GetGuardianById), new { id = guardian.Id }, MapDto(guardian));
         }
 
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Secretary,Administrator")]
+        public async Task<ActionResult<GuardianDto>> UpdateGuardianContact(int id, [FromBody] UpdateGuardianContactRequest request)
+        {
+            var guardian = await _context.Guardians.FirstOrDefaultAsync(g => g.Id == id);
+            if (guardian == null)
+            {
+                return NotFound(new { message = $"Guardian with ID {id} not found" });
+            }
+
+            if (string.IsNullOrWhiteSpace(request.PhoneNumber))
+            {
+                return BadRequest(new { message = "Phone number is required." });
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.Email))
+            {
+                var emailExists = await _context.Set<Person>().AnyAsync(p => p.Email == request.Email && p.Id != id);
+                if (emailExists)
+                {
+                    return BadRequest(new { message = "Email already exists." });
+                }
+            }
+
+            guardian.Email = request.Email;
+            guardian.PhoneNumber = request.PhoneNumber;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(MapDto(guardian));
+        }
+
         private static GuardianDto MapDto(Guardian guardian)
         {
             return new GuardianDto
