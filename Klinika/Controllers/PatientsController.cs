@@ -34,7 +34,7 @@ namespace Klinika.Controllers
                     p.FirstName.ToLower().Contains(normalized) ||
                     p.LastName.ToLower().Contains(normalized) ||
                     p.JMBG.Contains(normalized) ||
-                    p.PhoneNumber.Contains(normalized) ||
+                    (p.PhoneNumber ?? string.Empty).Contains(normalized) ||
                     (p.Email != null && p.Email.ToLower().Contains(normalized)));
             }
 
@@ -75,10 +75,10 @@ namespace Klinika.Controllers
 
             var patient = new Patient
             {
-                Email = request.Email,
+                Email = string.IsNullOrWhiteSpace(request.Email) ? null : request.Email.Trim(),
                 FirstName = request.FirstName,
                 LastName = request.LastName,
-                PhoneNumber = request.PhoneNumber,
+                PhoneNumber = string.IsNullOrWhiteSpace(request.PhoneNumber) ? string.Empty : request.PhoneNumber.Trim(),
                 JMBG = request.JMBG,
                 Gender = request.Gender,
                 DateOfBirth = request.DateOfBirth,
@@ -115,10 +115,10 @@ namespace Klinika.Controllers
                 return validation;
             }
 
-            patient.Email = request.Email;
+            patient.Email = string.IsNullOrWhiteSpace(request.Email) ? null : request.Email.Trim();
             patient.FirstName = request.FirstName;
             patient.LastName = request.LastName;
-            patient.PhoneNumber = request.PhoneNumber;
+            patient.PhoneNumber = string.IsNullOrWhiteSpace(request.PhoneNumber) ? string.Empty : request.PhoneNumber.Trim();
             patient.JMBG = request.JMBG;
             patient.Gender = request.Gender;
             patient.DateOfBirth = request.DateOfBirth;
@@ -161,9 +161,20 @@ namespace Klinika.Controllers
                 return BadRequest(new { message = "First name and last name are required." });
             }
 
-            if (string.IsNullOrWhiteSpace(request.PhoneNumber))
+            var normalizedEmail = string.IsNullOrWhiteSpace(request.Email) ? null : request.Email.Trim();
+            var normalizedPhone = string.IsNullOrWhiteSpace(request.PhoneNumber) ? null : request.PhoneNumber.Trim();
+
+            var age = DateTime.UtcNow.Year - request.DateOfBirth.Year;
+            if (request.DateOfBirth.Date > DateTime.UtcNow.Date.AddYears(-age))
             {
-                return BadRequest(new { message = "Phone number is required." });
+                age -= 1;
+            }
+
+            var isMinor = age < 18;
+
+            if (isMinor && !request.GuardianId.HasValue)
+            {
+                return BadRequest(new { message = "Patients under 18 must have a linked guardian." });
             }
 
             if (string.IsNullOrWhiteSpace(request.JMBG) || request.JMBG.Length != 13 || !request.JMBG.All(char.IsDigit))
@@ -176,9 +187,9 @@ namespace Klinika.Controllers
                 return BadRequest(new { message = "Blood type is required." });
             }
 
-            if (!string.IsNullOrWhiteSpace(request.Email))
+            if (!string.IsNullOrWhiteSpace(normalizedEmail))
             {
-                var emailExists = await _context.Patients.AnyAsync(p => p.Email == request.Email && (!currentPatientId.HasValue || p.Id != currentPatientId.Value));
+                var emailExists = await _context.Patients.AnyAsync(p => p.Email == normalizedEmail && (!currentPatientId.HasValue || p.Id != currentPatientId.Value));
                 if (emailExists)
                 {
                     return BadRequest(new { message = "Patient email already exists." });
@@ -211,7 +222,7 @@ namespace Klinika.Controllers
                 Email = patient.Email,
                 FirstName = patient.FirstName,
                 LastName = patient.LastName,
-                PhoneNumber = patient.PhoneNumber,
+                PhoneNumber = patient.PhoneNumber ?? string.Empty,
                 JMBG = patient.JMBG,
                 Gender = patient.Gender,
                 DateOfBirth = patient.DateOfBirth,
