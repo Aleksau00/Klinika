@@ -219,8 +219,14 @@ namespace Klinika.Services
             if (appointment is not TreatmentAppointment treatmentAppointment)
                 throw new InvalidOperationException("Appointment is not a treatment appointment");
 
-            if (appointment.Status != AppointmentStatus.InProgress)
+            if (appointment.Status != AppointmentStatus.InProgress && appointment.Status != AppointmentStatus.Scheduled)
                 throw new InvalidOperationException($"Cannot complete appointment with status: {appointment.Status}");
+
+            if (appointment.Status == AppointmentStatus.Scheduled)
+            {
+                appointment.Status = AppointmentStatus.InProgress;
+                appointment.CheckedInAt = DateTime.UtcNow;
+            }
 
             treatmentAppointment.Anamnesis = request.Anamnesis;
             treatmentAppointment.StatusObservation = request.StatusObservation;
@@ -245,8 +251,14 @@ namespace Klinika.Services
             if (preventiveAppointment.DoctorId != doctorId)
                 throw new InvalidOperationException("Doctor can only complete preventive appointments assigned to them.");
 
-            if (appointment.Status != AppointmentStatus.InProgress)
+            if (appointment.Status != AppointmentStatus.InProgress && appointment.Status != AppointmentStatus.Scheduled)
                 throw new InvalidOperationException($"Cannot complete appointment with status: {appointment.Status}");
+
+            if (appointment.Status == AppointmentStatus.Scheduled)
+            {
+                appointment.Status = AppointmentStatus.InProgress;
+                appointment.CheckedInAt = DateTime.UtcNow;
+            }
 
             var hasPreventiveContent = !string.IsNullOrWhiteSpace(request.PreventiveNotes)
                 || !string.IsNullOrWhiteSpace(request.ChildDevelopmentNotes);
