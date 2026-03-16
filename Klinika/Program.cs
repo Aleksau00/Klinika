@@ -1,3 +1,4 @@
+using Klinika.Configuration;
 using Klinika.DATA;
 using Klinika.Repositories;
 using Klinika.Services;
@@ -43,6 +44,8 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection(EmailSettings.SectionName));
+
 // Register repositories
 builder.Services.AddScoped<IAddressRepository, AddressRepository>();
 builder.Services.AddScoped<ICityRepository, CityRepository>();
@@ -58,6 +61,8 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAppointmentSlotService, AppointmentSlotService>();
 builder.Services.AddScoped<IClinicService, ClinicService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>(); // NEW
+builder.Services.AddScoped<IAppointmentNotificationService, AppointmentNotificationService>();
+builder.Services.AddScoped<IEmailService, SmtpEmailService>();
 builder.Services.AddScoped<IAllergenRepository, AllergenRepository>();
 builder.Services.AddScoped<IAllergenService, AllergenService>();
 builder.Services.AddScoped<IVaccinationRepository, VaccinationRepository>();

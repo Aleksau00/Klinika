@@ -3,6 +3,7 @@ using Klinika.Models;
 using Klinika.Models.DTOs;
 using Klinika.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Klinika.Services
 {
@@ -10,16 +11,22 @@ namespace Klinika.Services
     {
         private readonly IAppointmentRepository _appointmentRepository;
         private readonly IAppointmentSlotRepository _slotRepository;
+        private readonly IAppointmentNotificationService _appointmentNotificationService;
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<AppointmentService> _logger;
 
         public AppointmentService(
             IAppointmentRepository appointmentRepository,
             IAppointmentSlotRepository slotRepository,
-            ApplicationDbContext context)
+            IAppointmentNotificationService appointmentNotificationService,
+            ApplicationDbContext context,
+            ILogger<AppointmentService> logger)
         {
             _appointmentRepository = appointmentRepository;
             _slotRepository = slotRepository;
+            _appointmentNotificationService = appointmentNotificationService;
             _context = context;
+            _logger = logger;
         }
 
         public async Task<AppointmentDto> BookAppointmentAsync(CreateAppointmentRequest request, int secretaryId)
@@ -236,6 +243,16 @@ namespace Klinika.Services
             treatmentAppointment.CompletedAt = DateTime.UtcNow;
 
             await _appointmentRepository.UpdateAsync(treatmentAppointment);
+
+            try
+            {
+                await _appointmentNotificationService.NotifyAppointmentCompletedAsync(treatmentAppointment.Id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to send completion email for treatment appointment {AppointmentId}.", treatmentAppointment.Id);
+            }
+
             return await MapToDtoAsync(treatmentAppointment);
         }
 
@@ -310,6 +327,16 @@ namespace Klinika.Services
             preventiveAppointment.CompletedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
+
+            try
+            {
+                await _appointmentNotificationService.NotifyAppointmentCompletedAsync(preventiveAppointment.Id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to send completion email for preventive appointment {AppointmentId}.", preventiveAppointment.Id);
+            }
+
             return await MapToDtoAsync(preventiveAppointment);
         }
 
