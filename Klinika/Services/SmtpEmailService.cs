@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Net;
 using System.Net.Mail;
+using System.Net.Mime;
 
 namespace Klinika.Services
 {
@@ -17,13 +18,21 @@ namespace Klinika.Services
             _logger = logger;
         }
 
-        public async Task SendAsync(string toEmail, string toName, string subject, string plainTextBody, CancellationToken cancellationToken = default)
+        public async Task SendAsync(
+            string toEmail,
+            string toName,
+            string subject,
+            string plainTextBody,
+            IReadOnlyCollection<EmailAttachment>? attachments = null,
+            CancellationToken cancellationToken = default)
         {
             if (!_settings.IsConfigured())
             {
                 _logger.LogWarning("Email settings are incomplete; skipping outgoing email to {Recipient}.", toEmail);
                 return;
             }
+
+            var attachmentStreams = new List<MemoryStream>();
 
             using var message = new MailMessage
             {
@@ -34,13 +43,35 @@ namespace Klinika.Services
             };
             message.To.Add(new MailAddress(toEmail, toName));
 
+            if (attachments != null)
+            {
+                foreach (var file in attachments)
+                {
+                    var stream = new MemoryStream(file.Content);
+                    attachmentStreams.Add(stream);
+
+                    var mailAttachment = new Attachment(stream, file.FileName, file.ContentType ?? MediaTypeNames.Application.Octet);
+                    message.Attachments.Add(mailAttachment);
+                }
+            }
+
             using var client = new SmtpClient(_settings.Host, _settings.Port)
             {
                 EnableSsl = _settings.UseSsl,
                 Credentials = new NetworkCredential(_settings.Username, _settings.Password),
             };
 
-            await client.SendMailAsync(message, cancellationToken);
+            try
+            {
+                await client.SendMailAsync(message, cancellationToken);
+            }
+            finally
+            {
+                foreach (var stream in attachmentStreams)
+                {
+                    stream.Dispose();
+                }
+            }
         }
     }
 }

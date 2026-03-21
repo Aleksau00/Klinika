@@ -9,15 +9,18 @@ namespace Klinika.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IEmailService _emailService;
+        private readonly IAppointmentDocumentService _appointmentDocumentService;
         private readonly ILogger<AppointmentNotificationService> _logger;
 
         public AppointmentNotificationService(
             ApplicationDbContext context,
             IEmailService emailService,
+            IAppointmentDocumentService appointmentDocumentService,
             ILogger<AppointmentNotificationService> logger)
         {
             _context = context;
             _emailService = emailService;
+            _appointmentDocumentService = appointmentDocumentService;
             _logger = logger;
         }
 
@@ -63,7 +66,25 @@ namespace Klinika.Services
                 "Klinika",
             });
 
-            await _emailService.SendAsync(recipient.Value.Email, recipient.Value.Name, subject, body, cancellationToken);
+            IReadOnlyCollection<EmailAttachment>? attachments = null;
+            if (appointment is TreatmentAppointment treatmentAppointment)
+            {
+                try
+                {
+                    var receipt = _appointmentDocumentService.CreateTreatmentReceipt(
+                        treatmentAppointment,
+                        appointment.Clinic.Name,
+                        doctorName,
+                        patientName);
+                    attachments = new[] { receipt };
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to generate treatment receipt PDF for appointment {AppointmentId}.", appointment.Id);
+                }
+            }
+
+            await _emailService.SendAsync(recipient.Value.Email, recipient.Value.Name, subject, body, attachments, cancellationToken);
         }
 
         private static (string Email, string Name)? ResolveRecipient(Patient patient)
